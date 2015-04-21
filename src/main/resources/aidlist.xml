@@ -301,7 +301,7 @@ A000000087 = RID of 3GPP/ETSI (UICC, USIM, USAT) (PIX is specific to card issuer
     <!--              D F M F A  . D F a r e 2 4 1 0 1    (Read the Mifare UID using command : 00B0000000) -->
     <Application AID="44464D4641 2E44466172653234313031"  Supported="false" ASI="EXACT_MATCH"   Type="" Name="DeviceFidelity In2Pay DFare applet" Description="http://www.nfcworld.com/2010/11/24/35207/devicefidelity-adds-nfc-support-for-android-and-mifare/"/>
 
-    <!-- EOPCCARD -->
-    <Application AID="454f504343415244"                  Supported="true" ASI="EXACT_MATCH"   Type="EMV" Name="Eopc card" Description=""/>
+    <!--              E O P C C A R D -->
+    <Application AID="454f504343415244"                   Supported="true" ASI="EXACT_MATCH"   Type="EMV" Name="Eopc card" Description=""/>
 
 </AIDList>
