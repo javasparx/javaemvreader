@@ -6,17 +6,17 @@
 <AIDList>
     <!-- VISA EMV contacted name: "VSDC" 
          VISA contactless name : "PayWave" -->
-    <Application AID="A000000003 1010"       Supported="true"  ASI="EXACT_MATCH"   Type="EMV" Name="VISA Debit/Credit (Classic)" Description="Standard/Gold VISA credit card"/>
+    <!--<Application AID="A000000003 1010"       Supported="true"  ASI="EXACT_MATCH"   Type="EMV" Name="VISA Debit/Credit (Classic)" Description="Standard/Gold VISA credit card"/>
     <Application AID="A000000003 101001"     Supported="false" ASI="EXACT_MATCH"   Type="EMV" Name="VISA Credit" Description=""/>
     <Application AID="A000000003 101002"     Supported="false" ASI="EXACT_MATCH"   Type="EMV" Name="VISA Debit" Description=""/>
     <Application AID="A000000003 2010"       Supported="false" ASI="EXACT_MATCH"   Type="EMV" Name="VISA Electron" Description="VISA Electron (Debit)"/>
     <Application AID="A000000003 2020"       Supported="false" ASI="EXACT_MATCH"   Type="EMV" Name="VISA" Description="V PAY"/>
     <Application AID="A000000003 3010"       Supported="false" ASI="EXACT_MATCH"   Type="EMV" Name="VISA Interlink" Description=""/>
     <Application AID="A000000003 4010"       Supported="false" ASI="EXACT_MATCH"   Type="EMV" Name="VISA Specific" Description=""/>
-    <Application AID="A000000003 5010"       Supported="false" ASI="EXACT_MATCH"   Type="EMV" Name="VISA Specific" Description=""/>
+    <Application AID="A000000003 5010"       Supported="false" ASI="EXACT_MATCH"   Type="EMV" Name="VISA Specific" Description=""/>-->
     <!--                         6010XXXX The PIX consists of 6010 followed by the currency code and currency exponent. -->
-    <Application AID="A000000003 6010"       Supported="false" ASI="EXACT_MATCH"   Type="EMV" Name="Domestic Visa Cash Stored Value" Description=""/>
-    <Application AID="A000000003 6020"       Supported="false" ASI="EXACT_MATCH"   Type="EMV" Name="International Visa Cash Stored Value" Description=""/>
+    <!--<Application AID="A000000003 6010"       Supported="false" ASI="EXACT_MATCH"   Type="EMV" Name="Domestic Visa Cash Stored Value" Description=""/>
+    <Application AID="A000000003 6020"       Supported="false" ASI="EXACT_MATCH"   Type="EMV" Name="International Visa Cash Stored Value" Description=""/>-->
     <!--
         VISA's Dynamic passcode authentication (DPA), just like Mastercard's Chip Authentication Protocol (CAP), 
         enables EMV IC cards (smart cards) to provide security in Internet transactions where the card can't be presented to the vendor.
@@ -26,19 +26,19 @@
         The credit card company can use this code to prove that the card was in possession of the person who is making the 
         Internet transaction and that they knew the PIN.  
     -->
-    <Application AID="A000000003 8002"       Supported="false" ASI="EXACT_MATCH"   Type="EMV" Name="VisaRemAuthen EMV-CAP" Description="VISA Auth dynamic passcode authentication (DPA). Used by Barclays/HBOS"/>
+    <!--<Application AID="A000000003 8002"       Supported="false" ASI="EXACT_MATCH"   Type="EMV" Name="VisaRemAuthen EMV-CAP" Description="VISA Auth dynamic passcode authentication (DPA). Used by Barclays/HBOS"/>
     <Application AID="A000000003 8010"       Supported="false" ASI="EXACT_MATCH"   Type="EMV" Name="VISA Plus" Description=""/>
     <Application AID="A000000003 9010"       Supported="false" ASI="EXACT_MATCH"   Type="EMV" Name="VISA Loyalty" Description=""/>
-    <Application AID="A000000003 999910"     Supported="false" ASI="EXACT_MATCH"   Type="EMV" Name="VISA Proprietary ATM" Description=""/>
+    <Application AID="A000000003 999910"     Supported="false" ASI="EXACT_MATCH"   Type="EMV" Name="VISA Proprietary ATM" Description=""/>-->
 
     <!-- MasterCard EMV contacted: "M/Chip" Contactless: "PayPass" -->
-    <Application AID="A000000004 1010"       Supported="false" ASI="EXACT_MATCH"   Type="EMV" Name="MasterCard Credit" Description="Standard MasterCard"/>
+    <!--<Application AID="A000000004 1010"       Supported="false" ASI="EXACT_MATCH"   Type="EMV" Name="MasterCard Credit" Description="Standard MasterCard"/>
     <Application AID="A000000004 2010"       Supported="false" ASI="EXACT_MATCH"   Type="EMV" Name="MasterCard Specific" Description=""/>
     <Application AID="A000000004 2203"       Supported="false" ASI="EXACT_MATCH"   Type="EMV" Name="MasterCard U.S." Description="Maestro Common AID"/>
     <Application AID="A000000004 3010"       Supported="false" ASI="EXACT_MATCH"   Type="EMV" Name="MasterCard Specific" Description=""/>
     <Application AID="A000000004 3060"       Supported="false" ASI="EXACT_MATCH"   Type="EMV" Name="Maestro (Debit)" Description="(Bankomat)"/>
     <Application AID="A000000004 4010"       Supported="false" ASI="EXACT_MATCH"   Type="EMV" Name="MasterCard Specific" Description=""/>
-    <Application AID="A000000004 5010"       Supported="false" ASI="EXACT_MATCH"   Type="EMV" Name="MasterCard Specific" Description=""/>
+    <Application AID="A000000004 5010"       Supported="false" ASI="EXACT_MATCH"   Type="EMV" Name="MasterCard Specific" Description=""/>-->
     <!--<Application AID="A000000004 5555"       Supported="false" ASI="EXACT_MATCH"   Type=""    Name="APDULogger" Description="AID on Cirrus Test Card"/>-->
     <!--<Application AID="A000000004 6000"       Supported="false" ASI="EXACT_MATCH"   Type="EMV" Name="Cirrus" Description="Mastercard Cirrus (Interbank Network)"/>-->
     <!--<Application AID="A000000004 8002"       Supported="false" ASI="EXACT_MATCH"   Type="EMV" Name="SecureCode Auth EMV-CAP" Description="Chip Authentication Protocol (CAP). Works with NatWest"/>-->
@@ -136,7 +136,7 @@
     <!-- Only test these 2 if all others fail -->
 <!--    <Application AID="A000000003"            Supported="false"  ASI="PARTIAL_MATCH" Type="" Name="VISA" Description=""/> -->
 <!--    <Application AID="A000000003 0000"       Supported="false" ASI="EXACT_MATCH"   Type="GP"  Name="Open Platform 2.0.1 Card Manager" Description="Early Global Platform standard / Some GP 2.1.1 Cards"/> -->
-    <Application AID="A000000003 000000"     Supported="false" ASI="EXACT_MATCH"   Type="GP"  Name="(VISA) Card Manager" Description="Used by most GP2.1.1 cards / Oberthur OP201 cards. Visa Proprietary Card Manager AID for OpenPlatform cards (visa.openplatform)."/>
+    <!--<Application AID="A000000003 000000"     Supported="false" ASI="EXACT_MATCH"   Type="GP"  Name="(VISA) Card Manager" Description="Used by most GP2.1.1 cards / Oberthur OP201 cards. Visa Proprietary Card Manager AID for OpenPlatform cards (visa.openplatform)."/>
     <Application AID="A000000003 534441"     Supported="false" ASI="EXACT_MATCH"   Type="GP"  Name="Schlumberger Security Domain" Description=""/>
     <Application AID="A000000003 5350"       Supported="false" ASI="EXACT_MATCH"   Type="GP"  Name="Security Domain" Description="OCS Oberthur Card System Security Domain Package AID / VGP Card Manager (for ISD and ASD)"/>
     <Application AID="A000000003 535041"     Supported="false" ASI="EXACT_MATCH"   Type="GP"  Name="Security Domain" Description="OCS Oberthur Card System Security Domain Applet AID / VGP Card Manager (for ISD and ASD)"/>
@@ -144,7 +144,7 @@
     <Application AID="A000000018 434D"       Supported="false" ASI="EXACT_MATCH"   Type="GP"  Name="Gemplus card manager" Description="434D = CM (ascii). Security domain for some GCX/GXP cards (GemXpresso Pro) (Gemalto)"/>
     <Application AID="A000000018 434D00"     Supported="false" ASI="EXACT_MATCH"   Type="GP"  Name="Gemplus Security Domain" Description="(Gemalto)"/>
     <Application AID="A000000096 0200"       Supported="false" ASI="EXACT_MATCH"   Type="GP"  Name="Proton World International Security Domain" Description="Proton, which is owned in part by Visa International and American Express Co., is in three other European countries: the original Proton program in Belgium, Chipknip in the Netherlands, and Cash in Switzerland"/>
-    <Application AID="A000000151 0000"       Supported="false" ASI="EXACT_MATCH"   Type="GP"  Name="Global Platform Security Domain AID" Description="GP Card Manager"/>
+    <Application AID="A000000151 0000"       Supported="false" ASI="EXACT_MATCH"   Type="GP"  Name="Global Platform Security Domain AID" Description="GP Card Manager"/>-->
                       
     <!-- CAC (Common Access Card) http://www.cac.mil/docs/technical_announcements/ref%205-Technical_Bulletin_CAC_2_6_2b_Applet_Structure_June_2009[1].pdf --> 
     <!--<Application AID="A000000079 1201"     Supported="false" ASI="EXACT_MATCH"   Type="" Name="CAC JDM" Description="Joint Data Model. BCAdmin"/>-->

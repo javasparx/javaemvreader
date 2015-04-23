@@ -1,3 +1,18 @@
+
+######################
+#       Ubuntu       #
+######################
+
+#install libs
+sudo apt-get install libccid pcscd libpcsclite-dev libpcsclite1
+#start service
+sudo service pcscd start
+#run Java with parameter
+-Dsun.security.smartcardio.library=/lib/x86_64-linux-gnu/libpcsclite.so.1
+
+
+######################
+
 Notes about codesigning & timestamping:
 
 Sign and timestamp JAR: 
