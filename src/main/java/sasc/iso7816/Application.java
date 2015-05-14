@@ -15,14 +15,17 @@
  */
 package sasc.iso7816;
 
-import java.io.PrintWriter;
 import sasc.smartcard.common.SmartCard;
+
+import java.io.PrintWriter;
 
 /**
  *
  */
 public interface Application extends File {
     AID getAID();
+
     SmartCard getCard();
+
     void dump(PrintWriter pw, int indent);
 }

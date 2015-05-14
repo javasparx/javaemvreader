@@ -28,7 +28,6 @@ import sasc.util.Log;
 import sasc.util.Util;
 
 /**
- *
  * @author sasc
  */
 public class CardExplorer {
@@ -36,7 +35,7 @@ public class CardExplorer {
     //Declare SmartCard here, so in case some exception is thrown, we can still try to dump all the information we found
     SmartCard smartCard = null;
 
-    public SmartCard getEMVCard(){
+    public SmartCard getEMVCard() {
         return smartCard;
     }
 
@@ -48,7 +47,7 @@ public class CardExplorer {
         try {
             cardConnection = TerminalUtil.connect(TerminalUtil.State.CARD_INSERTED);
 
-            if(cardConnection == null){
+            if (cardConnection == null) {
                 Log.debug("TerminalUtil.connect returned null");
                 return;
             }
@@ -68,7 +67,7 @@ public class CardExplorer {
 
             EMVSession session = EMVSession.startSession(smartCard, cardConnection);
 
-			//This will override any callback handler set previously (eg by the GUI class)
+            //This will override any callback handler set previously (eg by the GUI class)
 //            EMVTerminal.setPinCallbackHandler(new CallbackHandler(){
 //
 //                @Override
@@ -92,7 +91,7 @@ public class CardExplorer {
 
             session.initContext();
             for (EMVApplication app : smartCard.getEmvApplications()) {
-                try{ //If the processing of this app fails, just skip it
+                try { //If the processing of this app fails, just skip it
                     session.selectApplication(app);
                     session.initiateApplicationProcessing(); //GET PROCESSING OPTIONS + READ RECORD(s)
 
@@ -111,21 +110,21 @@ public class CardExplorer {
 
 
                     //Check if the transaction processing skipped some steps
-                    if(app.getATC() == -1 || app.getLastOnlineATC() == -1) {
+                    if (app.getATC() == -1 || app.getLastOnlineATC() == -1) {
                         session.testReadATCData(); //ATC, Last Online ATC
                     }
                     //If PIN Try Counter has not been read, try to read it
-                    if(app.getPINTryCounter() == -1) {
+                    if (app.getPINTryCounter() == -1) {
                         session.readPINTryCounter();
                     }
-                    if(!app.isTransactionLogProcessed()) {
+                    if (!app.isTransactionLogProcessed()) {
                         session.checkForTransactionLogRecords();
                     }
 
                     //testGetChallenge (see if the app supports generating an unpredictable number)
                     session.testGetChallenge();
 
-                } catch(Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace(System.err);
                     Log.info(String.format("Error processing app: %s. Skipping app: %s", e.getMessage(), app.toString()));
                     continue;
@@ -151,10 +150,10 @@ public class CardExplorer {
             ex.printStackTrace(System.err);
             Log.info(ex.toString());
         } finally {
-            if (cardConnection != null){
-                try{
+            if (cardConnection != null) {
+                try {
                     cardConnection.disconnect(true);
-                }catch(TerminalException ex){
+                } catch (TerminalException ex) {
                     ex.printStackTrace(System.err);
                 }
             }

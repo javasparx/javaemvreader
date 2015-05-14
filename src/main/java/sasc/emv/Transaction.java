@@ -16,7 +16,6 @@
 package sasc.emv;
 
 /**
- *
  * @author sasc
  */
 public class Transaction {

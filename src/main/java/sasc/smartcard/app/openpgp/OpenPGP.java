@@ -17,14 +17,14 @@ package sasc.smartcard.app.openpgp;
 
 /**
  * TODO
- * 
+ *
  * @author sasc
  */
 public class OpenPGP {
-    
+
     //First, select by simple AID (6 bytes)
     //Then find DataObjects
-    
+
 //    GET DATA
 //0101 DO for private use (optional)
 //0102 DO for private use (optional)
@@ -38,5 +38,5 @@ public class OpenPGP {
 //5F52 Historical bytes
 //7F21 Cardholder Certificate
 //C4 PW Status Bytes
-    
+
 }

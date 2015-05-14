@@ -18,20 +18,22 @@ package sasc.terminal;
 import java.io.IOException;
 
 /**
- *
  * @author sasc
  */
-public class TerminalException extends IOException{
-    public TerminalException(){
+public class TerminalException extends IOException {
+    public TerminalException() {
         super();
     }
-    public TerminalException(String message){
+
+    public TerminalException(String message) {
         super(message);
     }
-    public TerminalException(String message, Throwable cause){
+
+    public TerminalException(String message, Throwable cause) {
         super(message, cause);
     }
-    public TerminalException(Throwable cause){
+
+    public TerminalException(Throwable cause) {
         super(cause);
     }
 }

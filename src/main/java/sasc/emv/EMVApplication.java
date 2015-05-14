@@ -15,32 +15,21 @@
  */
 package sasc.emv;
 
-import sasc.iso7816.TagAndLength;
-import sasc.iso7816.Tag;
-import sasc.iso7816.SmartCardException;
-import sasc.iso7816.BERTLV;
-import sasc.iso7816.AID;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import sasc.smartcard.common.SmartCard;
-import sasc.iso7816.Application;
-import sasc.iso7816.TLVUtil;
+import sasc.iso7816.*;
 import sasc.lookup.IIN_DB;
+import sasc.smartcard.common.SmartCard;
 import sasc.util.ISO3166_1;
 import sasc.util.ISO4217_Numeric;
 import sasc.util.Log;
 import sasc.util.Util;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.*;
+
 /**
- *
  * @author sasc
  */
 public class EMVApplication implements Application {
@@ -97,10 +86,10 @@ public class EMVApplication implements Application {
     private IBAN iban;
     private BankIdentifierCode bic;
     private byte[] discretionaryData = null;
-    
+
     //Transaction related data elements (TODO move to terminal object)
     private TransactionStatusInformation transactionStatusInformation = new TransactionStatusInformation();
-    
+
     //The terminal shall store all recognised data objects read, whether mandatory or optional, 
     //for later use in the transaction processing. 
     //Data objects that are not recognised by the terminal 
@@ -121,17 +110,17 @@ public class EMVApplication implements Application {
         this.aid = _aid;
     }
 
-    public void setCard(SmartCard card){
+    public void setCard(SmartCard card) {
         this.card = card;
     }
-    
+
     @Override
     public SmartCard getCard() {
         return card;
     }
-    
+
     public void addUnknownRecord(BERTLV bertlv) {
-        if (aid != null 
+        if (aid != null
                 && Arrays.equals(aid.getAIDBytes(), Util.fromHexString("a0 00 00 00 03 00 00 00"))
                 && Arrays.equals(bertlv.getTag().getTagBytes(), Util.fromHexString("9f 65"))) {
             //TODO: this is a hack for GP App with tag 9f65 which is very common, but not handled yet
@@ -142,9 +131,9 @@ public class EMVApplication implements Application {
     public List<BERTLV> getUnknownRecords() {
         return Collections.unmodifiableList(unknownRecords);
     }
-    
+
     public void addUnprocessedRecord(BERTLV bertlv) {
-        if (aid != null 
+        if (aid != null
                 && Arrays.equals(aid.getAIDBytes(), Util.fromHexString("a0 00 00 00 03 00 00 00"))
                 && Arrays.equals(bertlv.getTag().getTagBytes(), Util.fromHexString("9f 65"))) {
             //TODO: this is a hack for GP App with tag 9f65 which is very common, but not handled yet
@@ -216,7 +205,7 @@ public class EMVApplication implements Application {
     public String getPreferredName() {
         return preferredName;
     }
-    
+
     public void setIssuerUrl(String issuerUrl) {
         this.issuerUrl = issuerUrl;
     }
@@ -224,11 +213,11 @@ public class EMVApplication implements Application {
     public String getIssuerUrl() {
         return issuerUrl;
     }
-    
+
     public void setATC(int atc) {
         this.applicationTransactionCounter = atc;
     }
-    
+
     public int getATC() {
         return applicationTransactionCounter;
     }
@@ -276,7 +265,7 @@ public class EMVApplication implements Application {
     public void setLastOnlineATC(int lastOnlineATCRecord) {
         this.lastOnlineATCRegister = lastOnlineATCRecord;
     }
-    
+
     public int getLastOnlineATC() {
         return lastOnlineATCRegister;
     }
@@ -298,7 +287,7 @@ public class EMVApplication implements Application {
             transactionLog.addRecord(logRecordBytes);
         }
     }
-    
+
     public TransactionLog getTransactionLog() {
         return transactionLog;
     }
@@ -353,27 +342,27 @@ public class EMVApplication implements Application {
     public String getCardholderName() {
         return cardholderName;
     }
-    
+
     public IBAN getIBAN() {
         return iban;
     }
-    
+
     public void setIBAN(IBAN iban) {
         this.iban = iban;
     }
-    
+
     public BankIdentifierCode getBIC() {
         return bic;
     }
-    
-    public void setBIC(BankIdentifierCode bic){
+
+    public void setBIC(BankIdentifierCode bic) {
         this.bic = bic;
     }
-    
+
     public byte[] getDiscretionaryData() {
         return Util.copyByteArray(discretionaryData);
     }
-    
+
     public void setDiscretionaryData(byte[] discretionaryData) {
         this.discretionaryData = Util.copyByteArray(discretionaryData);
     }
@@ -393,7 +382,7 @@ public class EMVApplication implements Application {
     public void setICCPublicKeyCertificate(ICCPublicKeyCertificate iccCert) {
         this.iccCert = iccCert;
     }
-    
+
     public ICCPinEnciphermentPublicKeyCertificate getICCPinEnciphermentPublicKeyCertificate() {
         return iccPinEnciphermentCert;
     }
@@ -440,7 +429,7 @@ public class EMVApplication implements Application {
     }
 
     public Date getExpirationDate() {
-        if (applicationExpirationDate==null) {
+        if (applicationExpirationDate == null) {
             return null;
         }
         return (Date) applicationExpirationDate.clone();
@@ -460,7 +449,7 @@ public class EMVApplication implements Application {
     }
 
     public Date getEffectiveDate() {
-        if(applicationEffectiveDate == null) {
+        if (applicationEffectiveDate == null) {
             return null;
         }
         return (Date) applicationEffectiveDate.clone();
@@ -676,11 +665,11 @@ public class EMVApplication implements Application {
     public boolean isAllAppRecordsInAFLRead() {
         return allAppRecordsRead;
     }
-    
+
     public void setTransactionLogProcessed() {
         isTransactionLogProcessed = true;
     }
-    
+
     public boolean isTransactionLogProcessed() {
         return isTransactionLogProcessed;
     }
@@ -703,7 +692,7 @@ public class EMVApplication implements Application {
         }
         pw.println(indentStr + "Label: " + getLabel());
         pw.println(indentStr + "Preferred Name: " + getPreferredName());
-        if (issuerUrl != null){
+        if (issuerUrl != null) {
             pw.println(indentStr + "Issuer URL: " + issuerUrl);
         }
         if (applicationEffectiveDate != null) {
@@ -873,7 +862,7 @@ public class EMVApplication implements Application {
         }
         if (!unknownRecords.isEmpty()) {
             pw.println(indentStr + "UNKNOWN APPLICATION RECORDS (" + unknownRecords.size() + " found):");
-        
+
             for (BERTLV tlv : unknownRecords) {
                 pw.println(Util.getSpaces(indent + Log.INDENT_SIZE * 2) + tlv.getTag() + " " + tlv);
             }

@@ -15,11 +15,11 @@
  */
 package sasc.iso7816;
 
-import java.util.Arrays;
 import sasc.util.Util;
 
+import java.util.Arrays;
+
 /**
- *
  * @author sasc
  */
 public class TagImpl implements Tag {
@@ -41,21 +41,21 @@ public class TagImpl implements Tag {
     }
 
     private void build(byte[] idBytes, TagValueType tagValueType, String name, String description) {
-        if(idBytes == null){
+        if (idBytes == null) {
             throw new IllegalArgumentException("Param id cannot be null");
         }
-        if(idBytes.length == 0) {
+        if (idBytes.length == 0) {
             throw new IllegalArgumentException("Param id cannot be empty");
         }
-        if(tagValueType == null){
+        if (tagValueType == null) {
             throw new IllegalArgumentException("Param tagValueType cannot be null");
         }
         this.idBytes = idBytes;
-        this.name = name!=null?name:"";
-        this.description = description!=null?description:"";
+        this.name = name != null ? name : "";
+        this.description = description != null ? description : "";
         this.tagValueType = tagValueType;
 
-        if(Util.isBitSet(this.idBytes[0], 6)){
+        if (Util.isBitSet(this.idBytes[0], 6)) {
             this.type = TagType.CONSTRUCTED;
         } else {
             this.type = TagType.PRIMITIVE;
@@ -65,22 +65,22 @@ public class TagImpl implements Tag {
         //The value 01 indicates a data object of the application class.
         //The value 10 indicates a data object of the context-specific class.
         //The value 11 indicates a data object of the private class.
-        byte classValue = (byte)(this.idBytes[0] >>> 6 & 0x03);
-        switch(classValue){
-            case (byte)0x00:
+        byte classValue = (byte) (this.idBytes[0] >>> 6 & 0x03);
+        switch (classValue) {
+            case (byte) 0x00:
                 tagClass = Class.UNIVERSAL;
                 break;
-            case (byte)0x01:
+            case (byte) 0x01:
                 tagClass = Class.APPLICATION;
                 break;
-            case (byte)0x02:
+            case (byte) 0x02:
                 tagClass = Class.CONTEXT_SPECIFIC;
                 break;
-            case (byte)0x03:
+            case (byte) 0x03:
                 tagClass = Class.PRIVATE;
                 break;
             default:
-                throw new RuntimeException("UNEXPECTED TAG CLASS: "+Util.byte2BinaryLiteral(classValue) + " " + Util.byteArrayToHexString(this.idBytes) + " " + name);
+                throw new RuntimeException("UNEXPECTED TAG CLASS: " + Util.byte2BinaryLiteral(classValue) + " " + Util.byteArrayToHexString(this.idBytes) + " " + name);
         }
 
     }
@@ -100,8 +100,8 @@ public class TagImpl implements Tag {
         return name;
     }
 
-    @Override 
-    public String getDescription(){
+    @Override
+    public String getDescription() {
         return description;
     }
 
@@ -116,15 +116,15 @@ public class TagImpl implements Tag {
     }
 
     @Override
-    public Class getTagClass(){
+    public Class getTagClass() {
         return tagClass;
     }
 
     @Override
-    public boolean equals(Object other){
-        if(!(other instanceof Tag)) return false;
-        Tag that = (Tag)other;
-        if(this.getTagBytes().length != that.getTagBytes().length) return false;
+    public boolean equals(Object other) {
+        if (!(other instanceof Tag)) return false;
+        Tag that = (Tag) other;
+        if (this.getTagBytes().length != that.getTagBytes().length) return false;
 
         return Arrays.equals(this.getTagBytes(), that.getTagBytes());
     }
@@ -142,7 +142,7 @@ public class TagImpl implements Tag {
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Tag[");
         sb.append(Util.byteArrayToHexString(getTagBytes()));
@@ -156,7 +156,7 @@ public class TagImpl implements Tag {
         sb.append(tagClass);
         return sb.toString();
     }
-    
+
     public static void main(String[] args) throws Exception {
         TagImpl tag = new TagImpl("bf0c", TagValueType.BINARY, "", "");
         System.out.println(tag);

@@ -16,7 +16,6 @@
 package sasc.smartcard.app.piv;
 
 /**
- *
  * @author sasc
  */
 public class PIV {

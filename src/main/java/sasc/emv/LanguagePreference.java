@@ -16,16 +16,16 @@
 package sasc.emv;
 
 import sasc.iso7816.SmartCardException;
+import sasc.util.Log;
+import sasc.util.Util;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import sasc.util.Log;
-import sasc.util.Util;
 
 /**
- *
  * @author sasc
  */
 public class LanguagePreference {
@@ -53,12 +53,12 @@ public class LanguagePreference {
         dump(new PrintWriter(sw), 0);
         return sw.toString();
     }
-    
-    public List<Locale> getLocales(){
+
+    public List<Locale> getLocales() {
         return prefs;
     }
-    
-    public Locale getPreferredLocale(){
+
+    public Locale getPreferredLocale() {
         return prefs.get(0);
     }
 

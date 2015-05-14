@@ -20,22 +20,21 @@ import sasc.lookup.IIN_DB;
 import sasc.lookup.RID_DB;
 
 /**
- *
  * @author sasc
  */
 public class Context {
-    private Context(){
+    private Context() {
         throw new UnsupportedOperationException("Not allowed to instantiate");
     }
-    
-    public static synchronized void init(){
+
+    public static synchronized void init() {
         IIN_DB.initialize();
         ATR_DB.initialize();
         RID_DB.initialize();
-        try{
+        try {
             Class.forName("sasc.util.ISO3166_1");
             Class.forName("sasc.util.ISO4217_Numeric");
-        }catch(ClassNotFoundException ex){
+        } catch (ClassNotFoundException ex) {
             throw new RuntimeException(ex);
         }
     }

@@ -15,27 +15,26 @@
  */
 package sasc;
 
+import nanoxml.XMLElement;
+import sasc.emv.SW;
+import sasc.iso7816.AID;
+import sasc.terminal.CardConnection;
+import sasc.terminal.CardResponse;
+import sasc.terminal.Terminal;
+import sasc.terminal.TerminalException;
+import sasc.util.Log;
+import sasc.util.Util;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import nanoxml.XMLElement;
-import sasc.iso7816.AID;
-import sasc.emv.EMVSession;
-import sasc.util.Log;
-import sasc.emv.SW;
-import sasc.smartcard.common.SessionProcessingEnv;
-import sasc.terminal.CardResponse;
-import sasc.terminal.Terminal;
-import sasc.terminal.TerminalException;
-import sasc.terminal.CardConnection;
-import sasc.util.Util;
 
 /**
  * An ICC emulator that uses data loaded from XML-file
- *
+ * <p/>
  * Emulate the external behavior of a Smart Card.
  *
  * @author sasc
@@ -211,16 +210,16 @@ public class CardEmulator implements CardConnection {
         }
     }
 
-    private static boolean hasLe(byte[] cmd){
-        if(cmd.length < 5){
+    private static boolean hasLe(byte[] cmd) {
+        if (cmd.length < 5) {
             return false;
         }
 
-        if(cmd.length == 5){
+        if (cmd.length == 5) {
             return true;
         }
 
-        if(Util.byteToInt(cmd[4]) == cmd.length-5-1){
+        if (Util.byteToInt(cmd[4]) == cmd.length - 5 - 1) {
             return true;
         }
         return false;
@@ -230,8 +229,8 @@ public class CardEmulator implements CardConnection {
     public CardResponse transmit(byte[] cmd) throws TerminalException {
         CardResponse response = null;
 
-        if(hasLe(cmd)){ //Strip Le
-            byte[] tmp = new byte[cmd.length-1];
+        if (hasLe(cmd)) { //Strip Le
+            byte[] tmp = new byte[cmd.length - 1];
             System.arraycopy(cmd, 0, tmp, 0, tmp.length);
             cmd = tmp;
         }
@@ -276,7 +275,7 @@ public class CardEmulator implements CardConnection {
                 }
                 break;
             case (byte) 0xF0:
-                if(cls == (byte) 0xFF){
+                if (cls == (byte) 0xFF) {
                     responseBytes = new byte[]{0x67, 0x00};
                     break;
                 }
@@ -307,7 +306,7 @@ public class CardEmulator implements CardConnection {
                 return createResponse(null, SW.INSTRUCTION_CODE_NOT_SUPPORTED_OR_INVALID);
             }
         }
-        if (cmd.length <= 5){ //Zero length AID
+        if (cmd.length <= 5) { //Zero length AID
             return createResponse(null, SW.FILE_OR_APPLICATION_NOT_FOUND);
         }
         if (Arrays.equals(cmd, SELECT_DDF_PSE)) {
@@ -423,7 +422,7 @@ public class CardEmulator implements CardConnection {
         if (card.selectedApp == null) {
             return createResponse(null, SW.COMMAND_NOT_ALLOWED_CONDITIONS_OF_USE_NOT_SATISFIED); //TODO check correct SW
         }
-        if (card.selectedApp.pinTryCounter == 0){
+        if (card.selectedApp.pinTryCounter == 0) {
             return createResponse(null, SW.COMMAND_NOT_ALLOWED_AUTHENTICATION_METHOD_BLOCKED);
         }
         byte[] pinBlock = null;
@@ -463,7 +462,7 @@ public class CardEmulator implements CardConnection {
             //shall be blocked. Any subsequent VERIFY command applied in the
             //context of that application shall then fail with SW1 SW2 = '6983'.
             card.selectedApp.pinTryCounter--;
-            byte sw2 = (byte)(0xc0 | card.selectedApp.pinTryCounter);
+            byte sw2 = (byte) (0xc0 | card.selectedApp.pinTryCounter);
             return new byte[]{(byte) 0x63, sw2};
         }
     }

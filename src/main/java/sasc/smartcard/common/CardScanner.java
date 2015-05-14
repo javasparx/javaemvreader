@@ -15,30 +15,18 @@
  */
 package sasc.smartcard.common;
 
-import java.io.ByteArrayInputStream;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import sasc.smartcard.app.conax.ConaxSession;
-import sasc.smartcard.app.yubikey.Yubikey;
 import sasc.emv.EMVAPDUCommands;
 import sasc.emv.EMVApplication;
 import sasc.emv.EMVUtil;
 import sasc.emv.SW;
-import sasc.iso7816.AID;
-import sasc.iso7816.BERTLV;
-import sasc.iso7816.Iso7816Commands;
-import sasc.iso7816.MasterFile;
-import sasc.iso7816.RID;
-import sasc.iso7816.SmartCardException;
-import sasc.iso7816.TLVException;
-import sasc.iso7816.TLVUtil;
+import sasc.iso7816.*;
 import sasc.lookup.RID_DB;
+import sasc.smartcard.app.conax.ConaxSession;
 import sasc.smartcard.app.globalplatform.GlobalPlatformDriver;
 import sasc.smartcard.app.globalplatform.SecurityDomainFCI;
 import sasc.smartcard.app.jcop.JCOPApplication;
 import sasc.smartcard.app.usim.USIMHandler;
+import sasc.smartcard.app.yubikey.Yubikey;
 import sasc.smartcard.pcsc.PCSC;
 import sasc.smartcard.pcsc.StorageCardHandler;
 import sasc.terminal.CardConnection;
@@ -48,8 +36,13 @@ import sasc.terminal.TerminalException;
 import sasc.util.Log;
 import sasc.util.Util;
 
+import java.io.ByteArrayInputStream;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
 /**
- *
  * @author sasc
  */
 public class CardScanner {
@@ -64,7 +57,7 @@ public class CardScanner {
         this.sessionEnv = sessionEnv;
     }
 
-    public SmartCard getCard(){
+    public SmartCard getCard() {
         return smartCard;
     }
 
@@ -77,7 +70,7 @@ public class CardScanner {
         byte[] command;
         CardResponse response;
 
-        if(sessionEnv.getDiscoverTerminalFeatures()){
+        if (sessionEnv.getDiscoverTerminalFeatures()) {
             //PC/SC Part 10. Supplement: IFDs with Feature Capabilities
             //v2.02.02
             //Section 2.3.1 GET_FEATURE_REQUEST by Pseudo-APDU
@@ -87,24 +80,24 @@ public class CardScanner {
 
             response = EMVUtil.sendCmd(terminal, command);
 
-            SW1 = (byte) response.getSW1();
-            SW2 = (byte) response.getSW2();
+            SW1 = response.getSW1();
+            SW2 = response.getSW2();
 
             if (SW1 == (byte) 0x90 && SW2 == (byte) 0x00) {
 
             }
 
             //Try using control command
-            try{
+            try {
                 Log.commandHeader("Transmit Control Command to discover the terminal features");
                 byte[] ccResponse = terminal.transmitControlCommand(PCSC.CM_IOCTL_GET_FEATURE_REQUEST, new byte[0]);
-                if(ccResponse != null){
-					Log.info("GET FEATURE REQUEST controlCommandResponse: "+Util.prettyPrintHexNoWrap(ccResponse));
+                if (ccResponse != null) {
+                    Log.info("GET FEATURE REQUEST controlCommandResponse: " + Util.prettyPrintHexNoWrap(ccResponse));
                     //TODO parse response
                     //Ex
                     //12 04 42 33 00 12   13 04 42 00 00 01
                 }
-            }catch(Exception e){
+            } catch (Exception e) {
                 Log.debug(e.toString());
             }
         }
@@ -121,9 +114,9 @@ public class CardScanner {
 
 
         //Check if any handlers are registered for the current ATR
-        for(AtrHandler atrHandler : Registry.getInstance().getHandlersForAtr(atr)) {
-            if(atrHandler.process(smartCard, terminal)) { //Returns true if handle exclusively
-            	smartCard.setAllKnownAidsProbed();
+        for (AtrHandler atrHandler : Registry.getInstance().getHandlersForAtr(atr)) {
+            if (atrHandler.process(smartCard, terminal)) { //Returns true if handle exclusively
+                smartCard.setAllKnownAidsProbed();
                 return;
             }
         }
@@ -132,7 +125,7 @@ public class CardScanner {
         Yubikey yk = new Yubikey();
         Registry.getInstance().registerAidHandler(yk, Yubikey.NEO_AID);
         GlobalPlatformDriver gpDriver = new GlobalPlatformDriver();
-        for(KnownAIDList.KnownAID gpAID : KnownAIDList.getAIDsByType("GP")) {
+        for (KnownAIDList.KnownAID gpAID : KnownAIDList.getAIDsByType("GP")) {
             Registry.getInstance().registerAidHandler(gpDriver, gpAID.getAID());
         }
         //USIM
@@ -159,18 +152,18 @@ public class CardScanner {
 
         response = EMVUtil.sendCmd(terminal, command);
 
-        SW1 = (byte) response.getSW1();
-        SW2 = (byte) response.getSW2();
+        SW1 = response.getSW1();
+        SW2 = response.getSW2();
 
         if (SW1 == (byte) 0x90 && SW2 == (byte) 0x00) {
-            try{
+            try {
                 SecurityDomainFCI fci = SecurityDomainFCI.parse(response.getData());
                 AID isdAid = fci.getSecurityManagerAid();
-                if(isdAid != null) {
+                if (isdAid != null) {
                     smartCard.addAID(isdAid);
                     Registry.getInstance().registerAidHandler(gpDriver, isdAid);
                 }
-            } catch(TLVException ex) {
+            } catch (TLVException ex) {
                 Log.info(ex.getMessage());
                 Log.debug(Util.getStackTrace(ex));
             }
@@ -185,8 +178,8 @@ public class CardScanner {
 
             CardResponse selectMFResponse = EMVUtil.sendCmd(terminal, command);
 
-            SW1 = (byte) selectMFResponse.getSW1();
-            SW2 = (byte) selectMFResponse.getSW2();
+            SW1 = selectMFResponse.getSW1();
+            SW2 = selectMFResponse.getSW2();
 
             if (SW1 == (byte) 0x90 && SW2 == (byte) 0x00) {
                 //Example response TODO
@@ -334,8 +327,8 @@ public class CardScanner {
 
             CardResponse selectMFByIdResponse = EMVUtil.sendCmd(terminal, command);
 
-            SW1 = (byte) selectMFByIdResponse.getSW1();
-            SW2 = (byte) selectMFByIdResponse.getSW2();
+            SW1 = selectMFByIdResponse.getSW1();
+            SW2 = selectMFByIdResponse.getSW2();
 
             if (SW1 == (byte) 0x90 && SW2 == (byte) 0x00) {
                 //Example response (ATR: 3b 95 95 40 ff d0 00 54 01 32)
@@ -367,8 +360,8 @@ public class CardScanner {
 //                CardResponse selectMFResponse2     = EMVUtil.sendCmd(terminal, "00 A4 01 00 02 3F 00");
                 CardResponse selectATRFileResponse = EMVUtil.sendCmd(terminal, command);
 
-                SW1 = (byte) selectATRFileResponse.getSW1();
-                SW2 = (byte) selectATRFileResponse.getSW2();
+                SW1 = selectATRFileResponse.getSW1();
+                SW2 = selectATRFileResponse.getSW2();
 
                 if (SW1 == (byte) 0x90 && SW2 == (byte) 0x00) {
 
@@ -386,8 +379,8 @@ public class CardScanner {
 
                         CardResponse readRecordResponse = EMVUtil.sendCmd(terminal, command);
 
-                        SW1 = (byte) readRecordResponse.getSW1();
-                        SW2 = (byte) readRecordResponse.getSW2();
+                        SW1 = readRecordResponse.getSW1();
+                        SW2 = readRecordResponse.getSW2();
 
                         if (SW1 == (byte) 0x90 && SW2 == (byte) 0x00) {
                             BERTLV tlv = TLVUtil.getNextTLV(new ByteArrayInputStream(readRecordResponse.getData()));
@@ -405,8 +398,8 @@ public class CardScanner {
 
                     CardResponse selectATRFileAbsPathResponse = EMVUtil.sendCmd(terminal, command);
 
-                    SW1 = (byte) selectATRFileAbsPathResponse.getSW1();
-                    SW2 = (byte) selectATRFileAbsPathResponse.getSW2();
+                    SW1 = selectATRFileAbsPathResponse.getSW1();
+                    SW2 = selectATRFileAbsPathResponse.getSW2();
 
                     if (SW1 == (byte) 0x90 && SW2 == (byte) 0x00) {
                         //Do the select ATR File command ever return any data?
@@ -423,8 +416,8 @@ public class CardScanner {
 
                             CardResponse readRecordResponse = EMVUtil.sendCmd(terminal, command);
 
-                            SW1 = (byte) readRecordResponse.getSW1();
-                            SW2 = (byte) readRecordResponse.getSW2();
+                            SW1 = readRecordResponse.getSW1();
+                            SW2 = readRecordResponse.getSW2();
 
                             if (SW1 == (byte) 0x90 && SW2 == (byte) 0x00) {
                                 BERTLV tlv = TLVUtil.getNextTLV(new ByteArrayInputStream(readRecordResponse.getData()));
@@ -445,13 +438,13 @@ public class CardScanner {
                 Log.commandHeader("SELECT FILE EF.DIR (if available)");
 
                 command = Util.fromHexString("00 A4 02 00 02 2F 00 00");
-          //      command = "00 A4 08 0C 02 2F 00 00";
+                //      command = "00 A4 08 0C 02 2F 00 00";
 
-                CardResponse selectMFResponse2     = EMVUtil.sendCmd(terminal, "00 A4 01 00 02 3F 00");
+                CardResponse selectMFResponse2 = EMVUtil.sendCmd(terminal, "00 A4 01 00 02 3F 00");
                 CardResponse selectDIRFileResponse = EMVUtil.sendCmd(terminal, command);
 
-                SW1 = (byte) selectDIRFileResponse.getSW1();
-                SW2 = (byte) selectDIRFileResponse.getSW2();
+                SW1 = selectDIRFileResponse.getSW1();
+                SW2 = selectDIRFileResponse.getSW2();
 
                 if (SW1 == (byte) 0x90 && SW2 == (byte) 0x00) {
                     //Example response (ATR: 3b 95 95 40 ff d0 00 54 01 32)
@@ -485,8 +478,8 @@ public class CardScanner {
 
                         CardResponse readRecordResponse = EMVUtil.sendCmd(terminal, command);
 
-                        SW1 = (byte) readRecordResponse.getSW1();
-                        SW2 = (byte) readRecordResponse.getSW2();
+                        SW1 = readRecordResponse.getSW1();
+                        SW2 = readRecordResponse.getSW2();
 
                         if (SW1 == (byte) 0x90 && SW2 == (byte) 0x00) {
                             BERTLV tlv = TLVUtil.getNextTLV(new ByteArrayInputStream(readRecordResponse.getData()));
@@ -512,7 +505,6 @@ public class CardScanner {
                     //...
 
 
-
                 } else {
                     //EF.DIR
                     //DIR file (path='3F002F00'). contains a set of BER-TLV data objects
@@ -522,8 +514,8 @@ public class CardScanner {
 
                     CardResponse selectDIRFileAbsPathResponse = EMVUtil.sendCmd(terminal, command);
 
-                    SW1 = (byte) selectDIRFileAbsPathResponse.getSW1();
-                    SW2 = (byte) selectDIRFileAbsPathResponse.getSW2();
+                    SW1 = selectDIRFileAbsPathResponse.getSW1();
+                    SW2 = selectDIRFileAbsPathResponse.getSW2();
 
                     if (SW1 == (byte) 0x90 && SW2 == (byte) 0x00) {
                         int sfi = 0; //TODO what sfi to read? from historical bytes??
@@ -537,8 +529,8 @@ public class CardScanner {
 
                             CardResponse readRecordResponse = EMVUtil.sendCmd(terminal, command);
 
-                            SW1 = (byte) readRecordResponse.getSW1();
-                            SW2 = (byte) readRecordResponse.getSW2();
+                            SW1 = readRecordResponse.getSW1();
+                            SW2 = readRecordResponse.getSW2();
 
                             if (SW1 == (byte) 0x90 && SW2 == (byte) 0x00) {
                                 BERTLV tlv = TLVUtil.getNextTLV(new ByteArrayInputStream(readRecordResponse.getData()));
@@ -558,25 +550,25 @@ public class CardScanner {
         }
 
         //Try to select all known AIDs
-        if(sessionEnv.getProbeAllKnownAIDs()){
+        if (sessionEnv.getProbeAllKnownAIDs()) {
             probeAllKnownAIDs();
         }
 
         //Still nothing found?
         //Select by 5 byte RID
-        if(smartCard.getAllAIDs().isEmpty() && sessionEnv.getSelectAllRIDs()) {
+        if (smartCard.getAllAIDs().isEmpty() && sessionEnv.getSelectAllRIDs()) {
             Map<String, RID> ridMap = RID_DB.getAll();
-            for(String ridString : ridMap.keySet()) {
+            for (String ridString : ridMap.keySet()) {
                 RID rid = ridMap.get(ridString);
 
-                Log.commandHeader("Send SELECT RID " + rid.getApplicant() + " ("+rid.getCountry()+")");
+                Log.commandHeader("Send SELECT RID " + rid.getApplicant() + " (" + rid.getCountry() + ")");
 
-                command = Iso7816Commands.selectByDFName(rid.getRIDBytes(), true, (byte)0);
+                command = Iso7816Commands.selectByDFName(rid.getRIDBytes(), true, (byte) 0);
 
                 response = EMVUtil.sendCmdNoParse(terminal, command);
 
-                SW1 = (byte) response.getSW1();
-                SW2 = (byte) response.getSW2();
+                SW1 = response.getSW1();
+                SW2 = response.getSW2();
 
                 if (SW1 == (byte) 0x90 && SW2 == (byte) 0x00) {
                     smartCard.addAID(new AID(rid.getRIDBytes()));
@@ -586,19 +578,19 @@ public class CardScanner {
 
 
         //Process the AIDs that was found
-        for(AID aid : smartCard.getAllAIDs()) {
+        for (AID aid : smartCard.getAllAIDs()) {
             List<ApplicationHandler> aidHandlers = Registry.getInstance().getHandlersForAid(aid);
-            if(aidHandlers != null) {
-                try{
-                    for(ApplicationHandler aidHandler : aidHandlers) {
-                        if(aidHandler.process(aid, smartCard, terminal)) {
+            if (aidHandlers != null) {
+                try {
+                    for (ApplicationHandler aidHandler : aidHandlers) {
+                        if (aidHandler.process(aid, smartCard, terminal)) {
                             //The aid is handled exclusively by this Handler
                             break;
                         }
                     }
-                } catch(TerminalException processEx) {
+                } catch (TerminalException processEx) {
                     Log.info(Util.getStackTrace(processEx));
-                } catch(RuntimeException processEx) {
+                } catch (RuntimeException processEx) {
                     Log.info(Util.getStackTrace(processEx));
                 }
 
@@ -633,7 +625,7 @@ public class CardScanner {
             //shall respond with SW1 SW2 = '6A82' (file not found).
 
 
-            Log.commandHeader("Direct selection of Application to generate candidate list - "+terminalAIDCandidate.getName());
+            Log.commandHeader("Direct selection of Application to generate candidate list - " + terminalAIDCandidate.getName());
             command = EMVAPDUCommands.selectByDFName(terminalAIDCandidate.getAID().getAIDBytes());
             CardResponse selectAppResponse = EMVUtil.sendCmd(terminal, command);
 
@@ -641,13 +633,13 @@ public class CardScanner {
 
             if (selectAppResponse.getSW() == SW.FUNCTION_NOT_SUPPORTED.getSW()) { //6a81
                 Log.info("'SELECT File using DF name = AID' not supported");
-            } else if (selectAppResponse.getSW() == SW.FILE_OR_APPLICATION_NOT_FOUND.getSW()){
-                if(Arrays.equals(terminalAIDCandidate.getAID().getAIDBytes(), Util.fromHexString("a0 00 00 01 67 41 30 00 ff"))
+            } else if (selectAppResponse.getSW() == SW.FILE_OR_APPLICATION_NOT_FOUND.getSW()) {
+                if (Arrays.equals(terminalAIDCandidate.getAID().getAIDBytes(), Util.fromHexString("a0 00 00 01 67 41 30 00 ff"))
                         && selectAppResponse.getData() != null
-                        && selectAppResponse.getData().length > 0){
+                        && selectAppResponse.getData().length > 0) {
                     //The JCOP identify applet is not selectable (responds with SW = 6a82), but if present, it returns data
                     smartCard.addAID(terminalAIDCandidate.getAID());
-                    if(selectAppResponse.getData().length == 19) {
+                    if (selectAppResponse.getData().length == 19) {
                         //Parse JCOP data
                         smartCard.addApplication(new JCOPApplication(terminalAIDCandidate.getAID(), selectAppResponse.getData(), smartCard));
                     }
@@ -686,12 +678,12 @@ public class CardScanner {
 
                         //Workaround: Some cards seem to misbehave.
                         //Abort if current response == previous response
-                        if(Arrays.equals(previousResponse, selectAppResponse.getData())){
+                        if (Arrays.equals(previousResponse, selectAppResponse.getData())) {
                             Log.debug("Current response was equal to the previous response. Aborting 'select next occurrence'");
                             break;
                         }
 
-                        Log.debug("Select next occurrence SW: " + Util.short2Hex(selectAppResponse.getSW()) + " (Stop if SW=" + Util.short2Hex(SW.FILE_OR_APPLICATION_NOT_FOUND.getSW())+")");
+                        Log.debug("Select next occurrence SW: " + Util.short2Hex(selectAppResponse.getSW()) + " (Stop if SW=" + Util.short2Hex(SW.FILE_OR_APPLICATION_NOT_FOUND.getSW()) + ")");
                         if (selectAppResponse.getSW() == SW.FUNCTION_NOT_SUPPORTED.getSW()) { //6a81
                             Log.info("'SELECT File using DF name = AID' not supported");
                         } else if (selectAppResponse.getSW() == SW.SELECTED_FILE_INVALIDATED.getSW()) {

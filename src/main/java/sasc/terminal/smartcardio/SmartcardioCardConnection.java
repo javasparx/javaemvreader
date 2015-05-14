@@ -15,7 +15,6 @@
  */
 package sasc.terminal.smartcardio;
 
-import javax.smartcardio.*;
 import sasc.terminal.CardConnection;
 import sasc.terminal.CardResponse;
 import sasc.terminal.Terminal;
@@ -23,11 +22,13 @@ import sasc.terminal.TerminalException;
 import sasc.util.Log;
 import sasc.util.Util;
 
+import javax.smartcardio.*;
+
 /**
  * Any handling of procedure bytes and GET REPONSE/GET DATA in javax.smartcardio
  * should be disabled, because of improper handling of the CLS byte in some
  * cases.
- *
+ * <p/>
  * Thus, the "procedure byte handling" of the the TAL (Terminal Abstraction
  * Layer), is moved to a higher layer.
  *
@@ -84,8 +85,8 @@ public class SmartcardioCardConnection implements CardConnection, Terminal {
          * transform Le=0x00 into Ne=256. SmartcardIO changes this back into
          * Le=0x00)
          */
-        CardResponseImpl response = null;
-        CommandAPDU commandAPDU = null;
+        CardResponseImpl response;
+        CommandAPDU commandAPDU;
 
         //Find the 'case' and print to Log 
         if (cmd.length == 4) { //Case 1 (EMV doesn't use this)
@@ -141,9 +142,9 @@ public class SmartcardioCardConnection implements CardConnection, Terminal {
             //if PCSCException: reflect to get error code
             //http://www.java2s.com/Open-Source/Java/6.0-JDK-Modules-sun/security/sun/security/smartcardio/PCSC.java.htm
             String desc = SmartcardioUtils.getPCSCErrorDescription(ce);
-            throw new TerminalException("Error occured while transmitting command: " 
-                    + Util.byteArrayToHexString(cmd) 
-                    + (desc.isEmpty()?"":" ("+desc+")"), ce);
+            throw new TerminalException("Error occured while transmitting command: "
+                    + Util.byteArrayToHexString(cmd)
+                    + (desc.isEmpty() ? "" : " (" + desc + ")"), ce);
         }
         return response;
     }
@@ -185,7 +186,6 @@ public class SmartcardioCardConnection implements CardConnection, Terminal {
 
     /**
      * Perform warm reset
-     *
      */
     @Override
     public void resetCard() throws TerminalException {
@@ -225,7 +225,7 @@ public class SmartcardioCardConnection implements CardConnection, Terminal {
             throw new TerminalException(cause.getMessage());
         }
     }
-    
+
     private class CardResponseImpl implements CardResponse {
 
         private byte[] data;
@@ -259,16 +259,16 @@ public class SmartcardioCardConnection implements CardConnection, Terminal {
         public short getSW() {
             return sw;
         }
-        
+
         @Override
         public String toString() {
             return Util.prettyPrintHex(data) + "\n" + Util.short2Hex(sw);
         }
     }
-    
+
 
     //Terminal interface    
-        
+
     @Override
     public CardConnection connect() throws TerminalException {
         throw new IllegalStateException("Already connected.");
@@ -286,9 +286,9 @@ public class SmartcardioCardConnection implements CardConnection, Terminal {
 
     @Override
     public boolean isCardPresent() throws TerminalException {
-        try{
+        try {
             return smartCardIOTerminal.isCardPresent();
-        }catch(CardException ex){
+        } catch (CardException ex) {
             throw new TerminalException(ex);
         }
     }

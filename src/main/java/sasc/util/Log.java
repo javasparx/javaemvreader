@@ -20,14 +20,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * This class implements a simple logging facility. This class should be replace by slf4j/log4j or simimlar
+ *
  * @author sasc
  */
 public class Log {
-    
+
     public static final String COMMAND_HEADER_FRAMING = "------------------------------------------------";//---------------------";
 
     public static final int INDENT_SIZE = 2;
-    
+
     private static AtomicInteger stepNo = new AtomicInteger(1);
     private static PrintWriter printWriter = null;
     private static Level level = Level.INFO;
@@ -50,14 +51,14 @@ public class Log {
         Log.level = level;
     }
 
-//    public static void setLevels(Level... levels){
+    //    public static void setLevels(Level... levels){
 //        EnumSet<Level> set = EnumSet.copyOf(Arrays.asList(levels));
 //    }
     public static Level getLevel() {
         return level;
     }
-    
-    public static void resetStepNo(){
+
+    public static void resetStepNo() {
         stepNo.set(1);
     }
 
@@ -78,9 +79,9 @@ public class Log {
     }
 
     public static void commandHeader(String msg) {
-        logInternal("\n"+COMMAND_HEADER_FRAMING
+        logInternal("\n" + COMMAND_HEADER_FRAMING
                 + "\n[Step " + stepNo.getAndIncrement() + "] " + msg
-                + "\n"+COMMAND_HEADER_FRAMING, Level.COMMAND);
+                + "\n" + COMMAND_HEADER_FRAMING, Level.COMMAND);
     }
 
     private static void logInternal(String msg, Level level) {

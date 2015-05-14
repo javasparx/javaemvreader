@@ -16,19 +16,19 @@
 package sasc.iso7816;
 
 /**
- *
  * @author sasc
  */
 public class TLVException extends SmartCardException {
 
-    public TLVException(String message){
+    public TLVException(String message) {
         super(message);
     }
 
     public TLVException(String message, Throwable cause) {
         super(message, cause);
     }
-    public TLVException(Throwable cause){
+
+    public TLVException(Throwable cause) {
         super(cause);
     }
 }

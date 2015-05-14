@@ -15,15 +15,16 @@
  */
 package sasc.terminal.smartcardio;
 
-import java.util.List;
 import sasc.terminal.CardConnection;
 import sasc.terminal.Terminal;
 import sasc.terminal.TerminalException;
 import sasc.terminal.TerminalProvider;
 
+import java.util.List;
+
 /**
  * Reflection Wrapper
- * 
+ *
  * @author sasc
  */
 public class SmartcardioTerminalProvider implements TerminalProvider {
@@ -58,7 +59,7 @@ public class SmartcardioTerminalProvider implements TerminalProvider {
             ex.printStackTrace(System.err);
         }
     }
-    
+
 //    static void setTerminalProvider(String newName){
 //        implementationClassName = newName;
 //    }
@@ -76,12 +77,12 @@ public class SmartcardioTerminalProvider implements TerminalProvider {
     public CardConnection connectAnyTerminal() throws TerminalException {
         return terminalProvider.connectAnyTerminal();
     }
-    
+
     @Override
     public CardConnection connectAnyTerminalWithCardPresent(String protocol) throws TerminalException {
         return terminalProvider.connectAnyTerminalWithCardPresent(protocol);
     }
-    
+
     @Override
     public CardConnection connectAnyTerminal(String protocol) throws TerminalException {
         return terminalProvider.connectAnyTerminal(protocol);

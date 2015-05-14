@@ -16,14 +16,13 @@
 package sasc.iso7816;
 
 /**
- *
  * @author sasc
  */
 public class APDUCommandBuilder {
     //If Lc is short, then Le is short
     //If Lc is extended, then Le is extended
     //Lc is only present if commandData.length > 0
-    public static byte[] build(byte cls, byte ins, byte p1, byte p2, byte[] commandData, int maxExpectedResponseBytes){
+    public static byte[] build(byte cls, byte ins, byte p1, byte p2, byte[] commandData, int maxExpectedResponseBytes) {
         return null;
     }
 }

@@ -15,34 +15,23 @@
  */
 package sasc;
 
-import java.awt.Desktop;
-import java.awt.Dimension;
-import java.awt.Toolkit;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.net.URI;
+import org.jdesktop.application.SingleFrameApplication;
+import sasc.emv.EMVApplication;
+import sasc.emv.EMVTerminal;
+import sasc.smartcard.common.CardExplorer;
+import sasc.smartcard.common.SmartCard;
+import sasc.util.Log;
+
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JPasswordField;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.SwingUtilities;
-import org.jdesktop.application.SingleFrameApplication;
-import sasc.emv.EMVApplication;
-import sasc.smartcard.common.CardExplorer;
-import sasc.smartcard.common.SmartCard;
-import sasc.emv.EMVTerminal;
-import sasc.util.Log;
+import javax.swing.*;
+import java.awt.*;
+import java.io.*;
+import java.net.URI;
 
 /**
- *
  * @author sasc
  */
 public class GUI extends SingleFrameApplication {
@@ -133,22 +122,22 @@ public class GUI extends SingleFrameApplication {
                 //Show submit feedback dialogue
                 boolean foundUnhandledRecords = false;
                 SmartCard card = explorer.getEMVCard();
-                if(card != null){
-                    if(card.getUnhandledRecords().size() > 0){
+                if (card != null) {
+                    if (card.getUnhandledRecords().size() > 0) {
                         foundUnhandledRecords = true;
                     }
-                    for(EMVApplication app : card.getEmvApplications()){
-                        if(app != null && app.getUnknownRecords().size() > 0){
+                    for (EMVApplication app : card.getEmvApplications()) {
+                        if (app != null && app.getUnknownRecords().size() > 0) {
                             foundUnhandledRecords = true;
                         }
                     }
                 }
 
-                if (!console.getText().contains("Finished Processing card.") 
+                if (!console.getText().contains("Finished Processing card.")
                         || console.getText().contains("Error processing app")) {
                     //Assume something failed. Show Popup with option to send email
                     submitFeedback("[JavaEMVReader-BUGREPORT]", "Error", "Something failed. Would you like to send an email report?");
-                }else if(foundUnhandledRecords){
+                } else if (foundUnhandledRecords) {
                     submitFeedback("[JavaEMVReader-UNKNOWN-RECORDS]", "Unknown Record(s)", "Found unknown records. Would you like to send an email report?");
                 }
             }
@@ -159,14 +148,14 @@ public class GUI extends SingleFrameApplication {
 //    }
 
     private void submitFeedback(String subject, String dialogTitle, String dialogText) {
-        
+
         if (Desktop.isDesktopSupported()) {
             Desktop desktop = Desktop.getDesktop();
             if (desktop.isSupported(Desktop.Action.MAIL)) {
                 int choice = JOptionPane.showConfirmDialog(console.getRootPane(), dialogText, dialogTitle, JOptionPane.OK_CANCEL_OPTION);
                 if (choice == JOptionPane.OK_OPTION) {
                     try {
-                        desktop.mail(new URI("mailto", getEAddr() + "?SUBJECT="+subject+"&BODY=(Please also include the complete output from JavaEMVReader, so we can understand what caused the problem)", null));
+                        desktop.mail(new URI("mailto", getEAddr() + "?SUBJECT=" + subject + "&BODY=(Please also include the complete output from JavaEMVReader, so we can understand what caused the problem)", null));
                     } catch (Exception ex) {
                         StringWriter st = new StringWriter();
                         ex.printStackTrace(new PrintWriter(st));
@@ -197,24 +186,24 @@ public class GUI extends SingleFrameApplication {
         sb.append(_i).append(_d).append(_e).append(_k).append(_g);
         return sb.toString();
     }
-    
+
     class PinCallbackHandlerGui implements CallbackHandler {
-        
+
 //        private static final char ZEROIZE_CHAR = ' '; //(char)0;
-        
+
         @Override
         public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-            for(Callback callback : callbacks){
-                if(callback instanceof PasswordCallback) {
-                    PasswordCallback pcall = (PasswordCallback)callback;
-                    
+            for (Callback callback : callbacks) {
+                if (callback instanceof PasswordCallback) {
+                    PasswordCallback pcall = (PasswordCallback) callback;
+
                     JPasswordField passwordField = new JPasswordField();
 
                     if (!pcall.isEchoOn()) {
                         passwordField.setEchoChar('*');
                     }
 
-                    int okCancel = JOptionPane.showConfirmDialog(null, passwordField, pcall.getPrompt(), 
+                    int okCancel = JOptionPane.showConfirmDialog(null, passwordField, pcall.getPrompt(),
                             JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
                     if (okCancel == JOptionPane.OK_OPTION) {
@@ -225,7 +214,7 @@ public class GUI extends SingleFrameApplication {
                     passwordField.setText(null); //Attempt to clear the pin
                     return;
                 } else {
-                    throw new UnsupportedCallbackException(callback, "Only PasswordCallback is supported, but found "+callback.getClass().getName());
+                    throw new UnsupportedCallbackException(callback, "Only PasswordCallback is supported, but found " + callback.getClass().getName());
                 }
             }
         }

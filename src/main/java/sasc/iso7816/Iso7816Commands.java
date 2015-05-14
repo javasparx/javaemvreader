@@ -15,24 +15,25 @@
  */
 package sasc.iso7816;
 
-import java.io.ByteArrayOutputStream;
 import sasc.util.Log;
 import sasc.util.Util;
 
+import java.io.ByteArrayOutputStream;
+
 /**
  * See Iso7816-4:2005 Table 4.2
- * 
+ *
  * @author sasc
  */
 public class Iso7816Commands {
-    
-    public static final byte ISO_CLA           = (byte)0x00;
-    public static final byte ISO_SELECT        = (byte)0xa4;
-    public static final byte ISO_READ_RECORD   = (byte)0xb2;
-    public static final byte ISO_INTERNAL_AUTH = (byte)0x88;
-    public static final byte ISO_EXTERNAL_AUTH = (byte)0x82;
-    public static final byte ISO_GET_DATA      = (byte)0xca;
-    
+
+    public static final byte ISO_CLA = (byte) 0x00;
+    public static final byte ISO_SELECT = (byte) 0xa4;
+    public static final byte ISO_READ_RECORD = (byte) 0xb2;
+    public static final byte ISO_INTERNAL_AUTH = (byte) 0x88;
+    public static final byte ISO_EXTERNAL_AUTH = (byte) 0x82;
+    public static final byte ISO_GET_DATA = (byte) 0xca;
+
     /**
      * Select Master File.
      * Standard iso7816 command
@@ -47,38 +48,38 @@ public class Iso7816Commands {
 
     public static byte[] selectByDFName(byte[] fileBytes, boolean lePresent, byte le) {
         if (fileBytes.length > 16) {
-            throw new IllegalArgumentException("Dedicated File name not valid (length > 16). Length = "+fileBytes.length);
+            throw new IllegalArgumentException("Dedicated File name not valid (length > 16). Length = " + fileBytes.length);
         }
-        byte[] cmd = new byte[5+fileBytes.length+(lePresent?1:0)];
+        byte[] cmd = new byte[5 + fileBytes.length + (lePresent ? 1 : 0)];
         cmd[0] = ISO_CLA;
         cmd[1] = ISO_SELECT;
         //04 - Direct selection by DF name (data field=DF name)
         cmd[2] = 0x04;
         //TODO: when P2 = 0C : see 7816-4 spec..
         cmd[3] = 0x00;
-        cmd[4] = (byte)fileBytes.length;
+        cmd[4] = (byte) fileBytes.length;
         System.arraycopy(fileBytes, 0, cmd, 5, fileBytes.length);
-        if(lePresent) {
-            cmd[cmd.length-1] = 0x00;
+        if (lePresent) {
+            cmd[cmd.length - 1] = 0x00;
         }
         return cmd;
     }
-    
+
     public static byte[] selectByDFNameNextOccurrence(byte[] fileBytes, boolean lePresent, byte le) {
         if (fileBytes.length > 16) {
-            throw new IllegalArgumentException("Dedicated File name not valid (length > 16). Length = "+fileBytes.length);
+            throw new IllegalArgumentException("Dedicated File name not valid (length > 16). Length = " + fileBytes.length);
         }
-        byte[] cmd = new byte[5+fileBytes.length+(lePresent?1:0)];
+        byte[] cmd = new byte[5 + fileBytes.length + (lePresent ? 1 : 0)];
         cmd[0] = ISO_CLA;
         cmd[1] = ISO_SELECT;
         //04 - Direct selection by DF name (data field=DF name)
         cmd[2] = 0x04;
         //02 - Next occurrence
         cmd[3] = 0x02;
-        cmd[4] = (byte)fileBytes.length;
+        cmd[4] = (byte) fileBytes.length;
         System.arraycopy(fileBytes, 0, cmd, 5, fileBytes.length);
-        if(lePresent) {
-            cmd[cmd.length-1] = 0x00;
+        if (lePresent) {
+            cmd[cmd.length - 1] = 0x00;
         }
         return cmd;
     }
@@ -120,14 +121,14 @@ public class Iso7816Commands {
         if (authenticationRelatedData == null) {
             throw new IllegalArgumentException("Argument 'authenticationRelatedData' cannot be null");
         }
-        byte[] cmd = new byte[5+authenticationRelatedData.length+1];
+        byte[] cmd = new byte[5 + authenticationRelatedData.length + 1];
         cmd[0] = ISO_CLA;
         cmd[1] = ISO_INTERNAL_AUTH;
         cmd[2] = 0x00;
         cmd[3] = 0x00;
-        cmd[4] = (byte)authenticationRelatedData.length;
+        cmd[4] = (byte) authenticationRelatedData.length;
         System.arraycopy(authenticationRelatedData, 0, cmd, 5, authenticationRelatedData.length);
-        cmd[cmd.length-1] = 0x00;
+        cmd[cmd.length - 1] = 0x00;
         return cmd;
     }
 
@@ -158,7 +159,7 @@ public class Iso7816Commands {
         stream.write(0x00); //Le
         return stream.toByteArray();
     }
-    
+
     public static byte[] getData(byte p1, byte p2, byte le) {
         byte[] cmd = new byte[5];
         cmd[0] = ISO_CLA;

@@ -16,12 +16,11 @@
 package sasc.iso7816;
 
 /**
- *
  * @author sasc
  */
 public interface Tag {
 
-    public enum Class{
+    public enum Class {
         UNIVERSAL, APPLICATION, CONTEXT_SPECIFIC, PRIVATE
     }
 

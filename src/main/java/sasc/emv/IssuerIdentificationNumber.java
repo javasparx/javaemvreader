@@ -15,61 +15,61 @@
  */
 package sasc.emv;
 
-import java.util.Arrays;
 import sasc.util.Util;
 
+import java.util.Arrays;
+
 /**
- *
- * A 6 digit number that identifies the major industry and the card issuer 
+ * A 6 digit number that identifies the major industry and the card issuer
  * and that forms the first part of the Primary Account Number (PAN)
- * 
+ *
  * @author sasc
  */
 public class IssuerIdentificationNumber {
-    
+
     byte[] iinBytes;
-    
+
     public IssuerIdentificationNumber(byte[] iinBytes) {
-        if(iinBytes == null) {
+        if (iinBytes == null) {
             throw new NullPointerException("Param iinBytes cannot be null");
         }
-        if(iinBytes.length != 3){
-            throw new IllegalArgumentException("Param iinBytes must have length 3, but was "+iinBytes.length);
+        if (iinBytes.length != 3) {
+            throw new IllegalArgumentException("Param iinBytes must have length 3, but was " + iinBytes.length);
         }
         this.iinBytes = Arrays.copyOf(iinBytes, iinBytes.length);
-        
+
     }
-    
+
     public IssuerIdentificationNumber(int iin) {
-        if(iin < 0 || iin > 1000000) {
-            throw new IllegalArgumentException("IIN must be between 0 and 999999, but was "+iin);
+        if (iin < 0 || iin > 1000000) {
+            throw new IllegalArgumentException("IIN must be between 0 and 999999, but was " + iin);
         }
         byte[] tmp = Util.intToBinaryEncodedDecimalByteArray(iin);
-        if(tmp.length != 6){
+        if (tmp.length != 6) {
             iinBytes = Util.resizeArray(tmp, 6);
         } else {
             iinBytes = tmp;
         }
     }
-    
-    public int getValue(){
+
+    public int getValue() {
         return Util.binaryHexCodedDecimalToInt(iinBytes);
     }
-    
-    public byte[] getBytes(){
+
+    public byte[] getBytes() {
         return Arrays.copyOf(iinBytes, iinBytes.length);
     }
-    
+
     @Override
-    public boolean equals(Object obj){
-        if(!(obj instanceof IssuerIdentificationNumber)){
+    public boolean equals(Object obj) {
+        if (!(obj instanceof IssuerIdentificationNumber)) {
             return false;
         }
-        IssuerIdentificationNumber that = (IssuerIdentificationNumber)obj;
-        if(this == that){
+        IssuerIdentificationNumber that = (IssuerIdentificationNumber) obj;
+        if (this == that) {
             return true;
         }
-        if(Arrays.equals(this.getBytes(), that.getBytes())){
+        if (Arrays.equals(this.getBytes(), that.getBytes())) {
             return true;
         }
 

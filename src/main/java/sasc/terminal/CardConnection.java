@@ -16,13 +16,12 @@
 package sasc.terminal;
 
 /**
- *
  * @author sasc
  */
 public interface CardConnection {
 
     CardResponse transmit(byte[] cmd) throws TerminalException;
-    
+
     byte[] transmitControlCommand(int controlCode, byte[] data) throws TerminalException;
 
     byte[] getATR();
@@ -30,16 +29,15 @@ public interface CardConnection {
     Terminal getTerminal();
 
     String getConnectionInfo();
-    
+
     String getProtocol();
-    
+
     /**
      * Attempt a warm reset
      */
     void resetCard() throws TerminalException;
 
     /**
-     *
      * @param attemptReset
      * @return true if the Provider supports card reset, and a reset was performed
      * @throws TerminalException

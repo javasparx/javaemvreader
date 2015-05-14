@@ -120,7 +120,7 @@ public enum WinErrorCodes {
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return getDescription();
     }
 

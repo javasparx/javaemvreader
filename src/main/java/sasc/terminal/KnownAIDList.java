@@ -15,21 +15,17 @@
  */
 package sasc.terminal;
 
+import nanoxml.XMLElement;
 import sasc.iso7816.AID;
+import sasc.util.Util;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import nanoxml.XMLElement;
-import sasc.util.Util;
+import java.util.*;
 
 /**
  * Part of list maintained by "Terminal"
- * 
+ *
  * @author sasc
  */
 public class KnownAIDList {
@@ -79,24 +75,24 @@ public class KnownAIDList {
             return ApplicationSelectionIndicator.PARTIAL_MATCH.equals(this.asi);
         }
 
-        public boolean isSupported(){
+        public boolean isSupported() {
             return this.supported;
         }
-        
-        public String getName(){
+
+        public String getName() {
             return name;
         }
-        
-        public String getType(){
+
+        public String getType() {
             return type;
         }
-        
-        public String getDescription(){
+
+        public String getDescription() {
             return description;
         }
 
         @Override
-        public String toString(){
+        public String toString() {
             StringBuilder buf = new StringBuilder();
             buf.append(Util.prettyPrintHexNoWrap(this.aid.getAIDBytes()));
             buf.append(" ");
@@ -115,19 +111,19 @@ public class KnownAIDList {
 
     public static Collection<KnownAID> getAIDsByType(String type) {
         List<KnownAID> aids = new ArrayList<KnownAID>();
-        for(KnownAID aid : knownAIDsMap.values()) {
-            if(type.equals(aid.getType())) {
+        for (KnownAID aid : knownAIDsMap.values()) {
+            if (type.equals(aid.getType())) {
                 aids.add(aid);
             }
         }
         return Collections.unmodifiableCollection(aids);
     }
-    
+
     public static Collection<KnownAID> getAIDs() {
         return Collections.unmodifiableCollection(knownAIDsMap.values());
     }
-    
-    public static KnownAID searchAID(byte[] aidBytes){
+
+    public static KnownAID searchAID(byte[] aidBytes) {
         return knownAIDsMap.get(new AID(aidBytes));
     }
 

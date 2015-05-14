@@ -16,9 +16,8 @@
 package sasc.emv;
 
 /**
- *
  * @author sasc
  */
 public class ApplicationCryptogramDataElements {
-    
+
 }

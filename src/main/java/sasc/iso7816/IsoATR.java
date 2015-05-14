@@ -15,13 +15,13 @@
  */
 package sasc.iso7816;
 
+import sasc.util.Util;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
-import sasc.util.Util;
 
 /**
- *
  * @author sasc
  */
 public class IsoATR {
@@ -50,21 +50,22 @@ public class IsoATR {
 //TB3
 //TCK
 
-    public static class ParseException extends Exception{
-        public ParseException(String msg){
+    public static class ParseException extends Exception {
+        public ParseException(String msg) {
             super(msg);
         }
-        public ParseException(String msg, Throwable cause){
+
+        public ParseException(String msg, Throwable cause) {
             super(msg, cause);
         }
     }
 
-    public static enum Protocol{
+    public static enum Protocol {
         T_0, T_1;
 
         @Override
-        public String toString(){
-            switch(this){
+        public String toString() {
+            switch (this) {
                 case T_0:
                     return "T=0";
                 case T_1:
@@ -74,71 +75,69 @@ public class IsoATR {
         }
     }
 
-    public static enum Convention{
+    public static enum Convention {
         INVERSE, DIRECT
     }
 
-    static IsoATR parse(byte[] atrBytes) throws IsoATR.ParseException{
+    static IsoATR parse(byte[] atrBytes) throws IsoATR.ParseException {
         return new IsoATR(atrBytes);
     }
 
-    private IsoATR(byte[] atrBytes) throws IsoATR.ParseException{
+    private IsoATR(byte[] atrBytes) throws IsoATR.ParseException {
 
         //TODO throw ParseException if not ISO compliant
 
-        try{
-        
+        try {
+
             this.atrBytes = atrBytes;
-            if(atrBytes[0] == (byte)0x3B){
+            if (atrBytes[0] == (byte) 0x3B) {
                 convention = Convention.DIRECT;
-            }else if(atrBytes[0] == (byte)0x3F){
+            } else if (atrBytes[0] == (byte) 0x3F) {
                 convention = Convention.INVERSE;
             }
 
             numHistoricalBytes = atrBytes[1] & 0x0F;
-        }catch(RuntimeException e){ //Catch all RE
+        } catch (RuntimeException e) { //Catch all RE
             throw new ParseException("Unable to parse ATR according to ISO", e);
         }
 
 
-
-
     }
 
-    public byte[] getATRBytes(){
+    public byte[] getATRBytes() {
         return Arrays.copyOf(atrBytes, atrBytes.length);
     }
 
-    public Convention getConvention(){
+    public Convention getConvention() {
         return convention;
     }
 
-    public Protocol getProtocol(){
+    public Protocol getProtocol() {
         return protocol;
     }
 
-    public byte[] getHistoricalBytes(){
+    public byte[] getHistoricalBytes() {
         byte[] tmp = new byte[numHistoricalBytes];
-        System.arraycopy(atrBytes, atrBytes.length-numHistoricalBytes, tmp, 0, numHistoricalBytes);
+        System.arraycopy(atrBytes, atrBytes.length - numHistoricalBytes, tmp, 0, numHistoricalBytes);
         return tmp;
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         StringWriter sw = new StringWriter();
         dump(new PrintWriter(sw), 0);
         return sw.toString();
     }
 
-    public void dump(PrintWriter pw, int indent){
-        pw.println(Util.getSpaces(indent)+"ISO Compliant Answer To Reset (ATR)");
-        String indentStr = Util.getSpaces(indent+3);
+    public void dump(PrintWriter pw, int indent) {
+        pw.println(Util.getSpaces(indent) + "ISO Compliant Answer To Reset (ATR)");
+        String indentStr = Util.getSpaces(indent + 3);
 
-        pw.println(indentStr+"Convention - "+convention);
-        pw.println(indentStr+"Protocol - "+protocol);
+        pw.println(indentStr + "Convention - " + convention);
+        pw.println(indentStr + "Protocol - " + protocol);
 
-        if(numHistoricalBytes > 0){
-            pw.println(indentStr+"Historical bytes - "+Util.prettyPrintHex(Util.byteArrayToHexString(getHistoricalBytes())));
+        if (numHistoricalBytes > 0) {
+            pw.println(indentStr + "Historical bytes - " + Util.prettyPrintHex(Util.byteArrayToHexString(getHistoricalBytes())));
         }
 
     }

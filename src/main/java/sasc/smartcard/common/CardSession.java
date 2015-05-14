@@ -25,25 +25,24 @@ import sasc.util.Log;
 import sasc.util.Util;
 
 /**
- *
  * @author sasc
  */
 public class CardSession {
-    
+
     private boolean cardInitialized = false;
     private SmartCard card;
     private CardConnection terminal;
     private SessionProcessingEnv sessionEnv;
-    
-    private CardSession(CardConnection terminal, SessionProcessingEnv sessionEnv){
+
+    private CardSession(CardConnection terminal, SessionProcessingEnv sessionEnv) {
         this.terminal = terminal;
         this.sessionEnv = sessionEnv;
     }
-    
+
     public static CardSession createSession(CardConnection terminal, SessionProcessingEnv sessionEnv) {
         return new CardSession(terminal, sessionEnv);
     }
-    
+
     public SmartCard initCard() throws TerminalException {
 
         if (cardInitialized) {
@@ -79,8 +78,8 @@ public class CardSession {
 
             CardResponse selectNEFResponse = EMVUtil.sendCmd(terminal, command);
 
-            SW1 = (byte) selectNEFResponse.getSW1();
-            SW2 = (byte) selectNEFResponse.getSW2();
+            SW1 = selectNEFResponse.getSW1();
+            SW2 = selectNEFResponse.getSW2();
 
             //NO-OP
         }

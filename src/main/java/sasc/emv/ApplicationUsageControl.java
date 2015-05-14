@@ -15,17 +15,18 @@
  */
 package sasc.emv;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import sasc.util.Log;
 import sasc.util.Util;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 /**
  * Application Usage Control
  * Indicates issuer‘s specified restrictions on the geographic usage and services allowed for the application
- *
+ * <p/>
  * EMV Book 3 Annex C3 (page 183)
- * 
+ *
  * @author sasc
  */
 public class ApplicationUsageControl {
@@ -80,97 +81,97 @@ public class ApplicationUsageControl {
 
     //The rest of the bits in the second byte are RFU (Reserved for Future Use)
 
-    public String getValidForDomesticCashTransactionsString(){
-        if(validForDomesticCashTransactions()){
+    public String getValidForDomesticCashTransactionsString() {
+        if (validForDomesticCashTransactions()) {
             return "Valid for domestic cash transactions";
-        }else{
+        } else {
             return "Not valid for domestic cash transactions";
         }
     }
-    
-    public String getValidForInternationalCashTransactionsString(){
-        if(validForInternationalCashTransactions()){
+
+    public String getValidForInternationalCashTransactionsString() {
+        if (validForInternationalCashTransactions()) {
             return "Valid for international cash transactions";
-        }else{
+        } else {
             return "Not valid for international cash transactions";
         }
     }
 
-    public String getValidForDomesticGoodsString(){
-        if(validForDomesticGoods()){
+    public String getValidForDomesticGoodsString() {
+        if (validForDomesticGoods()) {
             return "Valid for domestic goods";
-        }else{
+        } else {
             return "Not valid for domestic goods";
         }
     }
 
-    public String getValidForInternationalGoodsString(){
-        if(validForInternationalGoods()){
+    public String getValidForInternationalGoodsString() {
+        if (validForInternationalGoods()) {
             return "Valid for international goods";
-        }else{
+        } else {
             return "Not valid for international goods";
         }
     }
 
-    public String getValidForDomesticServicesString(){
-        if(validForDomesticServices()){
+    public String getValidForDomesticServicesString() {
+        if (validForDomesticServices()) {
             return "Valid for domestic services";
-        }else{
+        } else {
             return "Not valid for domestic services";
         }
     }
 
-    public String getValidForInternationalServicesString(){
-        if(validForInternationalGoods()){
+    public String getValidForInternationalServicesString() {
+        if (validForInternationalGoods()) {
             return "Valid for international services";
-        }else{
+        } else {
             return "Not valid for international services";
         }
     }
 
-    public String getValidAtATMsString(){
-        if(validAtATMs()){
+    public String getValidAtATMsString() {
+        if (validAtATMs()) {
             return "Valid at ATMs";
-        }else{
+        } else {
             return "Not valid at ATMs";
         }
     }
 
-    public String getValidAtTerminalsOtherThanATMsString(){
-        if(validAtTerminalsOtherThanATMs()){
+    public String getValidAtTerminalsOtherThanATMsString() {
+        if (validAtTerminalsOtherThanATMs()) {
             return "Valid at terminals other than ATMs";
-        }else{
+        } else {
             return "Not valid at terminals other than ATMs";
         }
     }
 
-    public String getDomesticCashbackAllowedString(){
-        if(domesticCashbackAllowed()){
+    public String getDomesticCashbackAllowedString() {
+        if (domesticCashbackAllowed()) {
             return "Domestic cashback allowed";
-        }else{
+        } else {
             return "Domestic cashback not allowed";
         }
     }
 
-    public String getInternationalCashbackAllowedString(){
-        if(internationalCashbackAllowed()){
+    public String getInternationalCashbackAllowedString() {
+        if (internationalCashbackAllowed()) {
             return "International cashback allowed";
-        }else{
+        } else {
             return "International cashback not allowed";
         }
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         StringWriter sw = new StringWriter();
         dump(new PrintWriter(sw), 0);
         return sw.toString();
     }
 
-    public void dump(PrintWriter pw, int indent){
-        pw.println(Util.getSpaces(indent)+"Application Usage Control");
+    public void dump(PrintWriter pw, int indent) {
+        pw.println(Util.getSpaces(indent) + "Application Usage Control");
 
-        String indentStr = Util.getSpaces(indent+Log.INDENT_SIZE);
+        String indentStr = Util.getSpaces(indent + Log.INDENT_SIZE);
 
         pw.println(indentStr + getValidForDomesticCashTransactionsString());
         pw.println(indentStr + getValidForInternationalCashTransactionsString());
@@ -186,8 +187,8 @@ public class ApplicationUsageControl {
         pw.println(indentStr + getInternationalCashbackAllowedString());
     }
 
-    public static void main(String[] args){
-        ApplicationUsageControl auc = new ApplicationUsageControl((byte)0xab, (byte)0x80);
+    public static void main(String[] args) {
+        ApplicationUsageControl auc = new ApplicationUsageControl((byte) 0xab, (byte) 0x80);
         System.out.println(auc.toString());
 
     }

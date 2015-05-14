@@ -19,14 +19,13 @@ import sasc.emv.EMVApplication;
 import sasc.iso7816.AID;
 
 /**
- *
  * @author sasc
  */
 public class VISAApplication extends EMVApplication {
 
-    public VISAApplication(AID aid){
-		//if(df60) in ADF then...
-		//else
+    public VISAApplication(AID aid) {
+        //if(df60) in ADF then...
+        //else
         //getData(df60) //Visa log entry (SFI)
     }
 }

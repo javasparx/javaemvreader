@@ -15,14 +15,15 @@
  */
 package sasc.iso7816;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import sasc.util.Log;
 import sasc.util.Util;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 /**
  * Short File Identifier
- * 
+ *
  * @author sasc
  */
 public class ShortFileIdentifier {

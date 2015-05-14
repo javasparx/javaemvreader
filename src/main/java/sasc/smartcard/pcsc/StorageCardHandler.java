@@ -15,8 +15,6 @@
  */
 package sasc.smartcard.pcsc;
 
-import java.util.Arrays;
-import java.util.List;
 import sasc.emv.EMVUtil;
 import sasc.emv.SW;
 import sasc.smartcard.common.AtrHandler;
@@ -27,22 +25,25 @@ import sasc.terminal.TerminalException;
 import sasc.util.Log;
 import sasc.util.Util;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Handler for reading storage cards inserted into a PC/SC compatible reader
  * (That is, a supported card AND a supported reader is required)
- *
+ * <p/>
  * Commands are sent to the IFD (reader), and then translated to appropriate commands for the respective cards.
  * Some commands only return data from the readers memory (like Get UID/HB)
- *
+ * <p/>
  * Some readers (e.g. ACR) have their own API for communication with storage cards.
  * This handler only supports readers that comply with the PC/SC spec, using
  * so-called Pseudo APDUs interpreted by the card reader.
- * 
+ * <p/>
  * Class is 0xff
- *
+ * <p/>
  * Part 3. Requirements for PC-Connected Interface Devices pcsc3_v2.01.09.pdf
  * 3.2.2.1 Storage Card Functionality Support
- *
+ * <p/>
  * This handler is invoked by locating the special access data in ATR
  * Example of how a PC/SC compliant IFD announces that it translates communication to a memory card
  * Samsung Galaxy S3 Secure Element:
@@ -113,18 +114,18 @@ public class StorageCardHandler implements AtrHandler {
 
         int addressMSB = 0;
         int addressLSB = 0;
-        while(addressMSB < 256) {
+        while (addressMSB < 256) {
             Log.commandHeader("PC/SC Read Binary (Storage Card)");
             command = Util.fromHexString("FF B0 00 00 00"); //with Le
-            command[2] = (byte)addressMSB;
-            command[3] = (byte)addressLSB;
+            command[2] = (byte) addressMSB;
+            command[3] = (byte) addressLSB;
             response = EMVUtil.sendCmdNoParse(terminal, command);
             SW1 = response.getSW1();
             SW2 = response.getSW2();
             data = response.getData();
-            if(data.length > 0 && response.getSW() == SW.SUCCESS.getSW()){
+            if (data.length > 0 && response.getSW() == SW.SUCCESS.getSW()) {
                 addressLSB++;
-                if(addressLSB > 255) {
+                if (addressLSB > 255) {
                     addressLSB = 0;
                     addressMSB++;
                 }

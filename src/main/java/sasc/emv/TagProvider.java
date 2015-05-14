@@ -18,21 +18,20 @@ package sasc.emv;
 import sasc.iso7816.Tag;
 
 /**
- *
  * Contains Tags specific to a Tag Authority
  * The authority is identified either by Issuer Identification Number or RID
- * 
+ * <p/>
  * Example authorities:
  * VISA
  * MasterCard
  * GlobalPlatform
  * ISO7816
  * EMV
- * 
+ *
  * @author sasc
  */
 public interface TagProvider {
-    
+
     /**
      * If the tag is not found, this method returns the "[UNHANDLED TAG]" containing 'tagBytes'
      *

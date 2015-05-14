@@ -18,35 +18,34 @@ package sasc.iso7816;
 import java.util.Arrays;
 
 /**
- *
  * @author sasc
  */
 public class TagAndLength {
     private Tag tag;
     private int length;
 
-    public TagAndLength(Tag tag, int length){
+    public TagAndLength(Tag tag, int length) {
         this.tag = tag;
         this.length = length;
     }
 
-    public Tag getTag(){
+    public Tag getTag() {
         return tag;
     }
 
-    public int getLength(){
+    public int getLength() {
         return length;
     }
-    
-    public byte[] getBytes(){
+
+    public byte[] getBytes() {
         byte[] tagBytes = tag.getTagBytes();
         byte[] tagAndLengthBytes = Arrays.copyOf(tagBytes, tagBytes.length + 1);
-        tagAndLengthBytes[tagAndLengthBytes.length-1] = (byte)length;
+        tagAndLengthBytes[tagAndLengthBytes.length - 1] = (byte) length;
         return tagAndLengthBytes;
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return tag.toString() + " length: " + length;
     }
 

@@ -20,7 +20,6 @@ import sasc.terminal.CardConnection;
 import sasc.terminal.TerminalException;
 
 /**
- *
  * @author sasc
  */
 public interface ApplicationHandler {

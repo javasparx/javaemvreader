@@ -15,23 +15,22 @@
  */
 package sasc.lookup;
 
+import sasc.util.Util;
+
 import java.io.BufferedReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.io.SequenceInputStream;
-import java.io.StringReader;
-import java.util.*;
+import java.util.Collections;
+import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
-import sasc.util.Util;
 
 /**
- * IIN (Issuer Identification Number), aka BIN - Bank Identification Number. 
- * 
+ * IIN (Issuer Identification Number), aka BIN - Bank Identification Number.
+ * <p/>
  * ISO/IEC 7812
  *
  * @author sasc
@@ -42,110 +41,110 @@ public class IIN_DB {
     private static final Map<String, IIN> iinMap = new ConcurrentHashMap<String, IIN>();
     private static final AtomicBoolean initCalled = new AtomicBoolean(false);
 
-	public synchronized static void initialize() {
-        if(initCalled.getAndSet(true)){
+    public synchronized static void initialize() {
+        if (initCalled.getAndSet(true)) {
             return;
 //            throw new IllegalStateException("initialize() already called");
         }
-		new Thread(new Runnable(){
-				@Override
-				public void run() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
 
-                    InputStream is1 = null;
-                    BufferedReader br = null;
+                InputStream is1 = null;
+                BufferedReader br = null;
 
-                    try {
-                        is1 = Util.loadResource(IIN_DB.class, "/iin_bin_list.txt");
-                        br = new BufferedReader(new InputStreamReader(is1));
+                try {
+                    is1 = Util.loadResource(IIN_DB.class, "/iin_bin_list.txt");
+                    br = new BufferedReader(new InputStreamReader(is1));
 
-                        String line;
+                    String line;
 
-                        //Skip first line
-                        line = br.readLine();
+                    //Skip first line
+                    line = br.readLine();
 
-                        while ((line = br.readLine()) != null) {
-                            if (line.startsWith("#") || line.trim().length() == 0) {
-                                continue;
-                            } else {
-                                StringTokenizer st = new StringTokenizer(line, ";");
+                    while ((line = br.readLine()) != null) {
+                        if (line.startsWith("#") || line.trim().length() == 0) {
+                            continue;
+                        } else {
+                            StringTokenizer st = new StringTokenizer(line, ";");
 
-                                String iinStr = null;
-                                String location = "";
-                                String type = "";
-                                String issuerName = "";
-                                String phoneNumber = "";
+                            String iinStr = null;
+                            String location = "";
+                            String type = "";
+                            String issuerName = "";
+                            String phoneNumber = "";
 
-                                iinStr = st.nextToken();
-                                if (st.hasMoreTokens()) {
-                                    location = st.nextToken();
-                                }
-                                if (st.hasMoreTokens()) {
-                                    type = st.nextToken();
-                                }
-                                if (st.hasMoreTokens()) {
-                                    issuerName = st.nextToken();
-                                }
-                                if (st.hasMoreTokens()) {
-                                    phoneNumber = st.nextToken();
-                                }
-
-                                if (iinMap.containsKey(iinStr)) {
-                                    throw new RuntimeException("IIN/BIN: Duplicate value \"" + iinStr + "\" found");
-                                }
-                                IIN iin = new IIN(iinStr, location, type, issuerName, phoneNumber);
-                                iinMap.put(iinStr, iin);
+                            iinStr = st.nextToken();
+                            if (st.hasMoreTokens()) {
+                                location = st.nextToken();
                             }
-                        }
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    } finally {
-                        if (is1 != null) {
-                            try {
-                                is1.close();
-                            } catch (IOException ex) {
-                                //Ignore
+                            if (st.hasMoreTokens()) {
+                                type = st.nextToken();
                             }
-                        }
-                        if (br != null) {
-                            try {
-                                br.close();
-                            } catch (IOException ex) {
-                                //Ignore
+                            if (st.hasMoreTokens()) {
+                                issuerName = st.nextToken();
                             }
-                        }
-						initLatch.countDown();
-					}
-				}
-			}).start();
+                            if (st.hasMoreTokens()) {
+                                phoneNumber = st.nextToken();
+                            }
 
-	}
-    
+                            if (iinMap.containsKey(iinStr)) {
+                                throw new RuntimeException("IIN/BIN: Duplicate value \"" + iinStr + "\" found");
+                            }
+                            IIN iin = new IIN(iinStr, location, type, issuerName, phoneNumber);
+                            iinMap.put(iinStr, iin);
+                        }
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                } finally {
+                    if (is1 != null) {
+                        try {
+                            is1.close();
+                        } catch (IOException ex) {
+                            //Ignore
+                        }
+                    }
+                    if (br != null) {
+                        try {
+                            br.close();
+                        } catch (IOException ex) {
+                            //Ignore
+                        }
+                    }
+                    initLatch.countDown();
+                }
+            }
+        }).start();
+
+    }
+
     /**
-     * Disable this database 
+     * Disable this database
      * (for example on memory restricted devices)
      */
     public synchronized static void disable() {
         initCalled.set(true);
         initLatch.countDown();
     }
-    
+
     public static Map<String, IIN> getAll() {
-		awaitInit();
-	    return Collections.unmodifiableMap(iinMap);
+        awaitInit();
+        return Collections.unmodifiableMap(iinMap);
     }
-    
-    public static boolean awaitInit(){
-        if(!initCalled.get()){
+
+    public static boolean awaitInit() {
+        if (!initCalled.get()) {
             throw new IllegalStateException("Not initalized. Call initialize() first");
         }
-		try{
-			initLatch.await();
-			return true;
-		}catch(InterruptedException ex){
-			Thread.currentThread().interrupt();
-		}
-		return false;
-	}
+        try {
+            initLatch.await();
+            return true;
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
+        return false;
+    }
 
     public static IIN searchIIN(int iin) {
         awaitInit();
@@ -196,25 +195,25 @@ public class IIN_DB {
         public String getPhoneNumber() {
             return phoneNumber;
         }
-        
-        public String getDescription(){
+
+        public String getDescription() {
             StringBuilder buf = new StringBuilder();
-            if(issuerName != null && !issuerName.isEmpty()){
+            if (issuerName != null && !issuerName.isEmpty()) {
                 buf.append(issuerName);
             }
-            if(type != null && !type.isEmpty()){
-                if(buf.length() > 0){
+            if (type != null && !type.isEmpty()) {
+                if (buf.length() > 0) {
                     buf.append(", ");
                 }
                 buf.append(type);
             }
-            if(location != null && !location.isEmpty()){
-                if(buf.length() > 0){
+            if (location != null && !location.isEmpty()) {
+                if (buf.length() > 0) {
                     buf.append(", ");
                 }
                 buf.append(location);
             }
-            
+
             return buf.toString();
         }
 

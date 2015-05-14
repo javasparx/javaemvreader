@@ -15,10 +15,11 @@
  */
 package sasc.emv;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import sasc.util.Log;
 import sasc.util.Util;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 /**
  * Transaction Status Information (TSI)

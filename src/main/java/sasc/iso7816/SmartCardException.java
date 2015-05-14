@@ -16,19 +16,19 @@
 package sasc.iso7816;
 
 /**
- *
  * @author sasc
  */
-public class SmartCardException extends RuntimeException{
+public class SmartCardException extends RuntimeException {
 
-    public SmartCardException(String message){
+    public SmartCardException(String message) {
         super(message);
     }
 
-    public SmartCardException(String message, Throwable cause){
+    public SmartCardException(String message, Throwable cause) {
         super(message, cause);
     }
-    public SmartCardException(Throwable cause){
+
+    public SmartCardException(Throwable cause) {
         super(cause);
     }
 }

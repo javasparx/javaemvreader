@@ -18,16 +18,15 @@ package sasc.emv;
 import sasc.iso7816.SmartCardException;
 
 /**
- *
  * @author sasc
  */
-public class SignedDataException extends SmartCardException{
+public class SignedDataException extends SmartCardException {
 
-    public SignedDataException(String message){
+    public SignedDataException(String message) {
         super(message);
     }
 
-    public SignedDataException(String message, Throwable cause){
+    public SignedDataException(String message, Throwable cause) {
         super(message, cause);
     }
 }

@@ -15,11 +15,6 @@
  */
 package sasc.smartcard.app.jcop;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import sasc.iso7816.AID;
 import sasc.iso7816.Application;
 import sasc.lookup.ATR_DB;
@@ -30,8 +25,13 @@ import sasc.terminal.TerminalUtil;
 import sasc.util.Log;
 import sasc.util.Util;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 /**
- *
  * @author sasc
  */
 public class JCOPApplication implements Application {
@@ -40,7 +40,7 @@ public class JCOPApplication implements Application {
     private byte[] data;
     private AID aid;
     private SmartCard card;
-    
+
     static {
         FIELD_NAMES_LENGTHS.put("FABKEY ID", 1);
         FIELD_NAMES_LENGTHS.put("PATCH ID", 1);
@@ -52,16 +52,16 @@ public class JCOPApplication implements Application {
         FIELD_NAMES_LENGTHS.put("ROM INFO", 3);
         FIELD_NAMES_LENGTHS.put("COMBO NAME", 1);
     }
-    
+
     public JCOPApplication(AID aid, byte[] data, SmartCard card) {
-        if(aid == null) {
+        if (aid == null) {
             throw new IllegalArgumentException("AID cannot be null");
         }
-        if(data == null) {
+        if (data == null) {
             throw new IllegalArgumentException("Param data cannot be null");
         }
-        if(data.length != 19) {
-            throw new IllegalArgumentException("data.length must be 19, but was "+data.length);
+        if (data.length != 19) {
+            throw new IllegalArgumentException("data.length must be 19, but was " + data.length);
         }
 //        if(card == null) {
 //            throw new IllegalArgumentException("Param card cannot be null");
@@ -69,7 +69,7 @@ public class JCOPApplication implements Application {
         this.aid = aid;
         this.data = data;
         this.card = card;
-        
+
         int idx = 0;
 
         for (String fieldName : FIELD_NAMES_LENGTHS.keySet()) {
@@ -79,7 +79,7 @@ public class JCOPApplication implements Application {
             fields.put(fieldName, Util.byteArrayToHexString(value));
         }
     }
-    
+
     @Override
     public AID getAID() {
         return aid;
@@ -89,7 +89,7 @@ public class JCOPApplication implements Application {
     public SmartCard getCard() {
         return card;
     }
-    
+
     @Override
     public String toString() {
         StringWriter sw = new StringWriter();
@@ -102,26 +102,26 @@ public class JCOPApplication implements Application {
         pw.println(Util.getSpaces(indent) + "JCOP Application");
 
         String indentStr = Util.getSpaces(indent + Log.INDENT_SIZE);
-        
+
         if (aid != null) {
             aid.dump(pw, indent + Log.INDENT_SIZE);
         }
-        
+
         for (String key : fields.keySet()) {
-            pw.println(indentStr+String.format("%s: %s", key, fields.get(key)) 
-                    + ("MASK NAME".equals(key)?" ("+Util.getSafePrintChars(Util.fromHexString(fields.get(key)))+")":""));
+            pw.println(indentStr + String.format("%s: %s", key, fields.get(key))
+                    + ("MASK NAME".equals(key) ? " (" + Util.getSafePrintChars(Util.fromHexString(fields.get(key))) + ")" : ""));
         }
     }
-    
+
     public static void main(String[] args) throws Exception {
         AID aid = new AID("A0 00 00 01 67 41 30 00 FF");
         JCOPApplication jcopApp = new JCOPApplication(aid, Util.fromHexString("B3 11 01 29 00 00 00 00 50 48 36 35 30 41 01 03 C1 3C 82"), null);
         System.out.println(jcopApp);
-        
+
         CardConnection cardConnection = TerminalUtil.connect(TerminalUtil.State.CARD_INSERTED); //Waits for card insertion
         Log.info(Util.prettyPrintHexNoWrap(cardConnection.getATR()));
         Log.info(ATR_DB.searchATR(cardConnection.getATR()).toString());
-        
+
         CardResponse selectJcopResponse = cardConnection.transmit(Util.fromHexString("00 a4 04 00 09 a0 00 00 01 67 41 30 00 ff 00"));
         System.out.println(selectJcopResponse);
         System.out.println(new JCOPApplication(aid, selectJcopResponse.getData(), null));
@@ -129,30 +129,30 @@ public class JCOPApplication implements Application {
     }
 }
 
-    //00h is not fused (not personalized), 01h is fused. 
-    //If not fused, you need the transport key,
-    //as the global platform keys are set randomly.
+//00h is not fused (not personalized), 01h is fused.
+//If not fused, you need the transport key,
+//as the global platform keys are set randomly.
 
-    //
-    // /identify
-    // => 00 A4 04 00 09 A0 00 00 01 67 41 30 00 FF          .........gA0..
-    // (28350 usec)
-    // <= B3 11 01 29 00 00 00 00 50 48 36 35 30 41 01 03    ...)....PH650A..
-    //    C1 3C 82 6A 82                                     .<.j.
-    // Status: File not found
-    // FABKEY ID:   0xB3
-    // PATCH ID:    0x11
-    // TARGET ID:   0x01 (smartmx)
-    // MASK ID:     0x29 (41)
-    // CUSTOM MASK: 00000000
-    // MASK NAME:   PH650A
-    // FUSE STATE:  fused
-    // ROM INFO:    C13C82
-    // COMBO NAME:  smartmx-m29.B3.11-PH650A
-    // 
-    //
-    
-    //RFIDIOT JCOP 41 (Random UID)
+//
+// /identify
+// => 00 A4 04 00 09 A0 00 00 01 67 41 30 00 FF          .........gA0..
+// (28350 usec)
+// <= B3 11 01 29 00 00 00 00 50 48 36 35 30 41 01 03    ...)....PH650A..
+//    C1 3C 82 6A 82                                     .<.j.
+// Status: File not found
+// FABKEY ID:   0xB3
+// PATCH ID:    0x11
+// TARGET ID:   0x01 (smartmx)
+// MASK ID:     0x29 (41)
+// CUSTOM MASK: 00000000
+// MASK NAME:   PH650A
+// FUSE STATE:  fused
+// ROM INFO:    C13C82
+// COMBO NAME:  smartmx-m29.B3.11-PH650A
+//
+//
+
+//RFIDIOT JCOP 41 (Random UID)
 //    FABKEY ID: 34
 //    PATCH ID: 04 
 //    TARGET ID: 01 (smartmx)
@@ -162,8 +162,8 @@ public class JCOPApplication implements Application {
 //    FUSE STATE: 01 
 //    ROM INFO: 03 d8 8d 
 //    COMBO NAME: 93
-    
-   //JCOP 31
+
+//JCOP 31
 //    30 
 //    04 
 //    01 (smartmx)
@@ -173,8 +173,8 @@ public class JCOPApplication implements Application {
 //    00 
 //    03 d8 8d 
 //    93
-    
-    //Yubikey NEO
+
+//Yubikey NEO
 //    03 
 //    71 
 //    01 SmartMX

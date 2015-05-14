@@ -15,20 +15,21 @@
  */
 package sasc.emv;
 
-import sasc.util.Log;
 import sasc.iso7816.SmartCardException;
+import sasc.util.Log;
+import sasc.util.Util;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import sasc.util.Util;
 
 /**
  * Signed Static Application Data
  * Digital signature on critical application parameters for SDA
- *
+ * <p/>
  * This object contains the hash that has been computed over 'critical' application records (Elementary Files)
  *
  * @author sasc
@@ -55,8 +56,8 @@ public class SignedStaticApplicationData {
     public IssuerPublicKeyCertificate getIssuerPublicKeyCertificate() {
         return application.getIssuerPublicKeyCertificate();
     }
-    
-    public byte[] getDataAuthenticationCode(){
+
+    public byte[] getDataAuthenticationCode() {
         return Arrays.copyOf(dataAuthenticationCode, dataAuthenticationCode.length);
     }
 
@@ -66,7 +67,7 @@ public class SignedStaticApplicationData {
         }
         validationPerformed = true; //'isValid' flag set further down
 
-        if(!application.getIssuerPublicKeyCertificate().validate()){ //Make sure the cert has been initialized
+        if (!application.getIssuerPublicKeyCertificate().validate()) { //Make sure the cert has been initialized
             isValid = false;
             return isValid();
         }
@@ -117,7 +118,7 @@ public class SignedStaticApplicationData {
 
         byte[] offlineAuthenticationRecords = application.getOfflineDataAuthenticationRecords();
 
-        Log.debug("OfflineDataAuthenticationRecords: "+Util.prettyPrintHex(offlineAuthenticationRecords));
+        Log.debug("OfflineDataAuthenticationRecords: " + Util.prettyPrintHex(offlineAuthenticationRecords));
 
         hashStream.write(offlineAuthenticationRecords, 0, offlineAuthenticationRecords.length);
 
@@ -131,7 +132,6 @@ public class SignedStaticApplicationData {
         if (!Arrays.equals(sha1Result, hash)) {
             throw new SignedDataException("Hash is not valid");
         }
-
 
 
         int trailer = stream.read();
@@ -173,9 +173,9 @@ public class SignedStaticApplicationData {
             pw.println(indentStr + "Hash: " + Util.byteArrayToHexString(hash));
 
         } else {
-            if(!application.getIssuerPublicKeyCertificate().validate()){
+            if (!application.getIssuerPublicKeyCertificate().validate()) {
                 pw.println(indentStr + "ISSUER CERTIFICATE NOT VALID. UNABLE TO VALIDATE DATA");
-            }else{
+            } else {
                 pw.println(indentStr + "SIGNED DATA NOT VALID");
             }
         }

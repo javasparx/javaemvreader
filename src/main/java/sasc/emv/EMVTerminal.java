@@ -15,18 +15,6 @@
  */
 package sasc.emv;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.Properties;
-import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.callback.PasswordCallback;
-import javax.security.auth.callback.UnsupportedCallbackException;
 import sasc.iso7816.Tag;
 import sasc.iso7816.TagAndLength;
 import sasc.iso7816.TagImpl;
@@ -35,11 +23,20 @@ import sasc.util.ISO4217_Numeric;
 import sasc.util.Log;
 import sasc.util.Util;
 
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.PasswordCallback;
+import javax.security.auth.callback.UnsupportedCallbackException;
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.*;
+
 /**
  * Representation of a Point of Sale (POS)
- * 
+ * <p/>
  * There is only 1 Terminal
- * 
+ *
  * @author sasc
  */
 public class EMVTerminal {
@@ -48,14 +45,14 @@ public class EMVTerminal {
     private final static Properties runtimeTerminalProperties = new Properties();
     private final static TerminalVerificationResults terminalVerificationResults = new TerminalVerificationResults();
     private final static CVMResults cvmResults = new CVMResults();
-    
+
     private static CallbackHandler pinCallbackHandler;
-    
+
     private static boolean doVerifyPinIfRequired = false;
     private static boolean isOnline = true;
-    
+
     static {
-        
+
         try {
             //Default properties
             defaultTerminalProperties.load(EMVTerminal.class.getResourceAsStream("/terminal.properties"));
@@ -69,13 +66,13 @@ public class EMVTerminal {
             String runtimeTerminalPropertiesFile = System.getProperty("/terminal.properties");
             if (runtimeTerminalPropertiesFile != null) {
                 runtimeTerminalProperties.load(new FileInputStream(runtimeTerminalPropertiesFile));
-                for(String key : runtimeTerminalProperties.stringPropertyNames()) {
+                for (String key : runtimeTerminalProperties.stringPropertyNames()) {
                     //Sanitize
-                    String sanitizedKey   = Util.byteArrayToHexString(Util.fromHexString(key)).toLowerCase();
+                    String sanitizedKey = Util.byteArrayToHexString(Util.fromHexString(key)).toLowerCase();
                     String sanitizedValue = Util.byteArrayToHexString(Util.fromHexString(runtimeTerminalProperties.getProperty(key))).toLowerCase();
-                    if(defaultTerminalProperties.contains(sanitizedKey) && sanitizedValue.length() != defaultTerminalProperties.getProperty(key).length()) {
+                    if (defaultTerminalProperties.contains(sanitizedKey) && sanitizedValue.length() != defaultTerminalProperties.getProperty(key).length()) {
                         //Attempt to set different length for a default value
-                        throw new RuntimeException("Attempted to set a value with unsupported length for key: " + sanitizedKey + " (value: "+sanitizedValue+")");
+                        throw new RuntimeException("Attempted to set a value with unsupported length for key: " + sanitizedKey + " (value: " + sanitizedValue + ")");
                     }
                     runtimeTerminalProperties.setProperty(sanitizedKey, sanitizedValue);
                 }
@@ -91,7 +88,7 @@ public class EMVTerminal {
     //     (Default to be used for constructing the INTERNAL AUTHENTICATE command if the DDOL in the card is not present)
     //TDOL (*Default* Transaction Certificate Data Object List)
     //     (Default to be used for generating the TC Hash Value if the TDOL in the card is not present)
-    
+
     //PDOL example (Visa Electron, contactless)
 //    9f 38 18 -- Processing Options Data Object List (PDOL)
 //         9f 66 04 -- Terminal Transaction Qualifiers
@@ -107,24 +104,24 @@ public class EMVTerminal {
         //Check if the value is specified in the runtime properties file
         String propertyValueStr = runtimeTerminalProperties.getProperty(Util.byteArrayToHexString(tal.getTag().getTagBytes()).toLowerCase());
 
-        if(propertyValueStr != null) {
+        if (propertyValueStr != null) {
             byte[] propertyValue = Util.fromHexString(propertyValueStr);
 
             if (propertyValue.length == tal.getLength()) {
                 return propertyValue;
             }
         }
-        
+
         if (tal.getTag().equals(EMVTags.TERMINAL_COUNTRY_CODE) && tal.getLength() == 2) {
             return findCountryCode(app);
         } else if (tal.getTag().equals(EMVTags.TRANSACTION_CURRENCY_CODE) && tal.getLength() == 2) {
             return findCurrencyCode(app);
         }
-        
+
         //Now check for default values
         propertyValueStr = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(tal.getTag().getTagBytes()).toLowerCase());
 
-        if(propertyValueStr != null) {
+        if (propertyValueStr != null) {
             byte[] propertyValue = Util.fromHexString(propertyValueStr);
 
             if (propertyValue.length == tal.getLength()) {
@@ -160,163 +157,161 @@ public class EMVTerminal {
     public static TerminalVerificationResults getTerminalVerificationResults() {
         return terminalVerificationResults;
     }
-    
-    public static void resetTVR(){
+
+    public static void resetTVR() {
         terminalVerificationResults.reset();
     }
-    
-    public static CVMResults getCVMResults()
-    {
-    	return cvmResults;
+
+    public static CVMResults getCVMResults() {
+        return cvmResults;
     }
-    
-    public static void resetCVMResults()
-    {
-    	cvmResults.reset();
+
+    public static void resetCVMResults() {
+        cvmResults.reset();
     }
-    
+
     public static void setProperty(String tagHex, String valueHex) {
         setProperty(new TagImpl(tagHex, TagValueType.BINARY, "", ""), Util.fromHexString(valueHex));
     }
-    
-    public static void setProperty(Tag tag, byte[] value){
+
+    public static void setProperty(Tag tag, byte[] value) {
         runtimeTerminalProperties.setProperty(Util.byteArrayToHexString(tag.getTagBytes()).toLowerCase(Locale.US), Util.byteArrayToHexString(value));
     }
-    
+
     public static boolean isCDASupported(EMVApplication app) {
-    	String tc = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(EMVTags.TERMINAL_CAPABILITIES.getTagBytes()));
-    	if(tc == null || tc.length() < 6) {
-    		return false;
+        String tc = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(EMVTags.TERMINAL_CAPABILITIES.getTagBytes()));
+        if (tc == null || tc.length() < 6) {
+            return false;
         }
-    	
-    	byte[] t = Util.fromHexString(tc);
 
-    	return (t[2] & 0x08) == 0x08;
+        byte[] t = Util.fromHexString(tc);
+
+        return (t[2] & 0x08) == 0x08;
     }
-    
+
     public static boolean isDDASupported(EMVApplication app) {
-    	String tc = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(EMVTags.TERMINAL_CAPABILITIES.getTagBytes()));
-    	if(tc == null || tc.length() < 6) {
-    		return false;
+        String tc = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(EMVTags.TERMINAL_CAPABILITIES.getTagBytes()));
+        if (tc == null || tc.length() < 6) {
+            return false;
         }
-        
-    	byte[] t = Util.fromHexString(tc);
 
-    	return (t[2] & 0x40) == 0x40;
+        byte[] t = Util.fromHexString(tc);
+
+        return (t[2] & 0x40) == 0x40;
     }
-    
+
     public static boolean isSDASupported(EMVApplication app) {
-    	String tc = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(EMVTags.TERMINAL_CAPABILITIES.getTagBytes()));
-    	if(tc == null || tc.length() < 6) {
-    		return false;
+        String tc = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(EMVTags.TERMINAL_CAPABILITIES.getTagBytes()));
+        if (tc == null || tc.length() < 6) {
+            return false;
         }
-    	
-    	byte[] t = Util.fromHexString(tc);
 
-    	return (t[2] & 0x80) == 0x80;
+        byte[] t = Util.fromHexString(tc);
+
+        return (t[2] & 0x80) == 0x80;
     }
-    
+
     public static boolean isATM() {
         return false;
     }
-    
+
     public static Date getCurrentDate() {
         return new Date();
     }
-    
+
     public static int getSupportedApplicationVersionNumber(EMVApplication app) {
         //For now, just return the version number maintained in the card
-    	String value = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(EMVTags.APP_VERSION_NUMBER_TERMINAL.getTagBytes()));
-    	if(value == null || value.length() < 4) {
-    		return 0;
+        String value = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(EMVTags.APP_VERSION_NUMBER_TERMINAL.getTagBytes()));
+        if (value == null || value.length() < 4) {
+            return 0;
         }
-    	byte[] t = Util.fromHexString(value);
+        byte[] t = Util.fromHexString(value);
 
         return Util.byteToInt(t[0], t[1]);
     }
-    
+
     public static boolean isCashTrx() {
-    	String value = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(EMVTags.ADDITIONAL_TERMINAL_CAPABILITIES.getTagBytes()));
-    	if(value == null || value.length() < 10) {
-    		return false;
+        String value = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(EMVTags.ADDITIONAL_TERMINAL_CAPABILITIES.getTagBytes()));
+        if (value == null || value.length() < 10) {
+            return false;
         }
-    	byte[] t = Util.fromHexString(value);
-    	
-    	return (t[0] & 0x80) == 0x80;
+        byte[] t = Util.fromHexString(value);
+
+        return (t[0] & 0x80) == 0x80;
     }
-    
+
     public static boolean isGoodsTrx() {
-    	String value = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(EMVTags.ADDITIONAL_TERMINAL_CAPABILITIES.getTagBytes()));
-    	if(value == null || value.length() < 10) {
-    		return false;
+        String value = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(EMVTags.ADDITIONAL_TERMINAL_CAPABILITIES.getTagBytes()));
+        if (value == null || value.length() < 10) {
+            return false;
         }
-    	byte[] t = Util.fromHexString(value);
-    	
-    	return (t[0] & 0x40) == 0x40;
+        byte[] t = Util.fromHexString(value);
+
+        return (t[0] & 0x40) == 0x40;
     }
-    
+
     public static boolean isServicesTrx() {
-    	String value = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(EMVTags.ADDITIONAL_TERMINAL_CAPABILITIES.getTagBytes()));
-    	if(value == null || value.length() < 10) {
-    		return false;
+        String value = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(EMVTags.ADDITIONAL_TERMINAL_CAPABILITIES.getTagBytes()));
+        if (value == null || value.length() < 10) {
+            return false;
         }
-    	byte[] t = Util.fromHexString(value);
-    	
-    	return (t[0] & 0x20) == 0x20;
+        byte[] t = Util.fromHexString(value);
+
+        return (t[0] & 0x20) == 0x20;
     }
-    
+
     public static boolean isCashbackTrx() {
-    	String value = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(EMVTags.ADDITIONAL_TERMINAL_CAPABILITIES.getTagBytes()));
-    	if(value == null || value.length() < 10) {
-    		return false;
+        String value = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(EMVTags.ADDITIONAL_TERMINAL_CAPABILITIES.getTagBytes()));
+        if (value == null || value.length() < 10) {
+            return false;
         }
-    	byte[] t = Util.fromHexString(value);
-    	
-    	return (t[0] & 0x10) == 0x10;
+        byte[] t = Util.fromHexString(value);
+
+        return (t[0] & 0x10) == 0x10;
     }
-    
+
     public static boolean isInquiryTrx() {
-    	String value = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(EMVTags.ADDITIONAL_TERMINAL_CAPABILITIES.getTagBytes()));
-    	if(value == null || value.length() < 10) {
-    		return false;
+        String value = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(EMVTags.ADDITIONAL_TERMINAL_CAPABILITIES.getTagBytes()));
+        if (value == null || value.length() < 10) {
+            return false;
         }
-    	byte[] t = Util.fromHexString(value);
-    	
-    	return (t[0] & 0x08) == 0x08;
+        byte[] t = Util.fromHexString(value);
+
+        return (t[0] & 0x08) == 0x08;
     }
-    
+
     public static boolean isTransferTrx() {
-    	String value = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(EMVTags.ADDITIONAL_TERMINAL_CAPABILITIES.getTagBytes()));
-    	if(value == null || value.length() < 10) {
-    		return false;
+        String value = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(EMVTags.ADDITIONAL_TERMINAL_CAPABILITIES.getTagBytes()));
+        if (value == null || value.length() < 10) {
+            return false;
         }
-    	byte[] t = Util.fromHexString(value);
-    	
-    	return (t[0] & 0x04) == 0x04;
+        byte[] t = Util.fromHexString(value);
+
+        return (t[0] & 0x04) == 0x04;
     }
-    
+
     public static boolean isPaymentTrx() {
-    	String value = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(EMVTags.ADDITIONAL_TERMINAL_CAPABILITIES.getTagBytes()));
-    	if(value == null || value.length() < 10) {
-    		return false;
+        String value = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(EMVTags.ADDITIONAL_TERMINAL_CAPABILITIES.getTagBytes()));
+        if (value == null || value.length() < 10) {
+            return false;
         }
-    	byte[] t = Util.fromHexString(value);
-    	
-    	return (t[0] & 0x02) == 0x02;
+        byte[] t = Util.fromHexString(value);
+
+        return (t[0] & 0x02) == 0x02;
     }
-    
+
     public static boolean isAdminTrx() {
-    	String value = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(EMVTags.ADDITIONAL_TERMINAL_CAPABILITIES.getTagBytes()));
-    	if(value == null || value.length() < 10) {
-    		return false;
+        String value = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(EMVTags.ADDITIONAL_TERMINAL_CAPABILITIES.getTagBytes()));
+        if (value == null || value.length() < 10) {
+            return false;
         }
-    	byte[] t = Util.fromHexString(value);
-    	
-    	return (t[0] & 0x01) == 0x01;
+        byte[] t = Util.fromHexString(value);
+
+        return (t[0] & 0x01) == 0x01;
     }
-    
+
     public static boolean isCVMRecognized(EMVApplication app, CVRule rule) {
-        switch(rule.getRule()) {
+        switch (rule.getRule()) {
             case RESERVED_FOR_USE_BY_THE_INDIVIDUAL_PAYMENT_SYSTEMS:
                 //app.getAID().getRIDBytes();
                 //TODO check if RID specific rule is supported
@@ -324,8 +319,8 @@ public class EMVTerminal {
                 //    return true;
                 //}
             case RESERVED_FOR_USE_BY_THE_ISSUER:
-                
-                if(app.getIssuerIdentificationNumber() != null){
+
+                if (app.getIssuerIdentificationNumber() != null) {
                     //TODO check if issuer specific rule is supported
                     //if(supported){
                     //  return true;
@@ -334,20 +329,20 @@ public class EMVTerminal {
             case NOT_AVAILABLE_FOR_USE:
             case RFU:
                 return false;
-			default:
-				break;
+            default:
+                break;
         }
         return true;
     }
-    
+
     public static boolean isCVMSupported(CVRule rule) {
-        switch(rule.getRule()) {
+        switch (rule.getRule()) {
             //TODO support enciphered PIN
             case ENCIPHERED_PIN_VERIFIED_BY_ICC:
             case ENCIPHERED_PIN_VERIFIED_BY_ICC_AND_SIGNATURE_ON_PAPER:
                 return false;
             case PLAINTEXT_PIN_VERIFIED_BY_ICC_AND_SIGNATURE_ON_PAPER:
-            	return hasPinInputOfflineCapability() && hasSignatureOnPaper();
+                return hasPinInputOfflineCapability() && hasSignatureOnPaper();
             case PLAINTEXT_PIN_VERIFIED_BY_ICC:
                 return hasPinInputOfflineCapability();
             case SIGNATURE_ON_PAPER:
@@ -355,7 +350,7 @@ public class EMVTerminal {
             case ENCIPHERED_PIN_VERIFIED_ONLINE:
                 return allowVerifyEncipheredPinOnline();
             case FAIL_PROCESSING:
-            	return true;
+                return true;
             case NO_CVM_REQUIRED:
                 return isNoCVMRequired();
             default:
@@ -363,23 +358,23 @@ public class EMVTerminal {
         }
         return false;
     }
-    
+
     public static boolean isOnline() {
         return isOnline;
     }
-    
-    public static void setIsOnline(boolean value){
+
+    public static void setIsOnline(boolean value) {
         isOnline = value;
     }
-    
+
     public static boolean isCVMConditionSatisfied(CVRule rule) {
-        if(rule.getConditionAlways()) {
+        if (rule.getConditionAlways()) {
             return true;
         }
-        if(rule.getConditionCode() <= 0x05){
+        if (rule.getConditionCode() <= 0x05) {
             //TODO
             return true;
-        }else if(rule.getConditionCode() < 0x0A) {
+        } else if (rule.getConditionCode() < 0x0A) {
             //TODO
             //Check for presence Application Currency Code or Amount, Authorised in app records?
             return true;
@@ -387,111 +382,110 @@ public class EMVTerminal {
             return false;
         }
     }
-    
+
     public static boolean allowVerifyEncipheredPinOnline() {
-        if(!isOnline()) {
+        if (!isOnline()) {
             return false;
         }
         String tc = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(EMVTags.TERMINAL_CAPABILITIES.getTagBytes()));
-    	if(tc == null || tc.length() < 6) {
-    		return false;
+        if (tc == null || tc.length() < 6) {
+            return false;
         }
-    	
-    	byte[] t = Util.fromHexString(tc);
 
-    	return (t[1] & 0x40) == 0x40;
+        byte[] t = Util.fromHexString(tc);
+
+        return (t[1] & 0x40) == 0x40;
     }
-    
+
     public static boolean hasSignatureOnPaper() {
-    	String tc = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(EMVTags.TERMINAL_CAPABILITIES.getTagBytes()));
-    	if(tc == null || tc.length() < 6) {
-    		return false;
+        String tc = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(EMVTags.TERMINAL_CAPABILITIES.getTagBytes()));
+        if (tc == null || tc.length() < 6) {
+            return false;
         }
-    	
-    	byte[] t = Util.fromHexString(tc);
 
-    	return (t[1] & 0x20) == 0x20;
+        byte[] t = Util.fromHexString(tc);
+
+        return (t[1] & 0x20) == 0x20;
     }
-    
+
     public static boolean isNoCVMRequired() {
-    	String tc = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(EMVTags.TERMINAL_CAPABILITIES.getTagBytes()));
-    	if(tc == null || tc.length() < 6) {
-    		return false;
+        String tc = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(EMVTags.TERMINAL_CAPABILITIES.getTagBytes()));
+        if (tc == null || tc.length() < 6) {
+            return false;
         }
-    	
-    	byte[] t = Util.fromHexString(tc);
 
-    	return (t[1] & 0x08) == 0x08;
+        byte[] t = Util.fromHexString(tc);
+
+        return (t[1] & 0x08) == 0x08;
     }
-    
+
     public static void setDoVerifyPinIfRequired(boolean value) {
         doVerifyPinIfRequired = value;
     }
-    
+
     public static boolean getDoVerifyPinIfRequired() {
         return doVerifyPinIfRequired;
     }
-    
+
     /**
-     * 
      * @return true if a Pin CallbackHandler has be set
      */
     public static boolean hasPinInputOfflineCapability() {
-    	String tc = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(EMVTags.TERMINAL_CAPABILITIES.getTagBytes()));
-    	if(tc == null || tc.length() < 6) {
-    		return false;
+        String tc = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(EMVTags.TERMINAL_CAPABILITIES.getTagBytes()));
+        if (tc == null || tc.length() < 6) {
+            return false;
         }
-    	
-    	byte []t = Util.fromHexString(tc);
-    	boolean isEnabledInProperties= (t[1] & 0x80) == 0x80;
-    	
+
+        byte[] t = Util.fromHexString(tc);
+        boolean isEnabledInProperties = (t[1] & 0x80) == 0x80;
+
         return doVerifyPinIfRequired && pinCallbackHandler != null && isEnabledInProperties;
     }
-    
+
     public static void setPinCallbackHandler(CallbackHandler callbackHandler) {
         pinCallbackHandler = callbackHandler;
     }
-    
+
     public static PasswordCallback getPinInput() {
         CallbackHandler callBackHandler = pinCallbackHandler;
-        if(callBackHandler == null){
+        if (callBackHandler == null) {
             return null;
         }
         PasswordCallback passwordCallback = new PasswordCallback("Enter PIN", false);
-        try{
+        try {
             callBackHandler.handle(new Callback[]{passwordCallback});
-        }catch(IOException ex){
+        } catch (IOException ex) {
             Log.info(Util.getStackTrace(ex));
-        }catch(UnsupportedCallbackException ex){
+        } catch (UnsupportedCallbackException ex) {
             Log.info(Util.getStackTrace(ex));
         }
         return passwordCallback;
     }
-    
+
     public static boolean getPerformTerminalRiskManagement() {
         return true;
     }
-    
+
     public static byte[] getTerminalActionCode(Tag tag, EMVApplication app) {
         //Return Terminal Action Code value based on tal
-    	String value = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(tag.getTagBytes()));
-    	
-    	if(value != null && value.length() == 10) {
-    		return Util.fromHexString(value);
+        String value = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(tag.getTagBytes()));
+
+        if (value != null && value.length() == 10) {
+            return Util.fromHexString(value);
         }
-            
-    	byte[] defaultResponse = new byte[5];
+
+        byte[] defaultResponse = new byte[5];
         Arrays.fill(defaultResponse, (byte) 0x00);
         return defaultResponse;
     }
-    
+
     public static int getTerminalType() {
         //Return Terminal Action Code value base on tal
-    	String value = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(EMVTags.TERMINAL_TYPE.getTagBytes()));
-        if(value == null) {
+        String value = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(EMVTags.TERMINAL_TYPE.getTagBytes()));
+        if (value == null) {
             return 0;
         }
-    	return Integer.parseInt(value);
+        return Integer.parseInt(value);
     }
 
     public static byte[] constructDOLResponse(DOL dol, EMVApplication app) {
@@ -508,17 +502,17 @@ public class EMVTerminal {
     public static byte[] getDefaultDDOLResponse(EMVApplication app) {
         //It is mandatory that the DDOL contains the Unpredictable Number generated by the terminal (tag '9F37', 4 bytes binary).
         byte[] unpredictableNumber = Util.generateRandomBytes(4);
-        
+
         //TODO add other DDOL data specified by the payment system
         //if(app.getAID().equals(SOMEAID))
-        
+
         return unpredictableNumber;
     }
 
     //Ex Banco BRADESCO (f0 00 00 00 03 00 01) failes GPO with wrong COUNTRY_CODE !
     public static byte[] findCountryCode(EMVApplication app) {
-        if(app != null){
-            if(app.getIssuerCountryCode() != -1){
+        if (app != null) {
+            if (app.getIssuerCountryCode() != -1) {
                 byte[] countryCode = Util.intToBinaryEncodedDecimalByteArray(app.getIssuerCountryCode());
                 return Util.resizeArray(countryCode, 2);
             }
@@ -527,61 +521,61 @@ public class EMVTerminal {
         Log.debug("No Issuer Country Code found in app. Using default Terminal Country Code");
 
         String countryCode = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(EMVTags.TERMINAL_COUNTRY_CODE.getTagBytes()));
-        if(countryCode != null){
+        if (countryCode != null) {
             return Util.fromHexString(countryCode);
         }
-        
+
         return new byte[]{0x08, 0x26};
     }
-    
+
     public static int getIntTerminalCountryCode() {
         //For now, just return the version number maintained in the card
-    	String value = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(EMVTags.TERMINAL_COUNTRY_CODE.getTagBytes()));
-    	if(value == null || value.length() < 4) {
-    		return 0;
+        String value = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(EMVTags.TERMINAL_COUNTRY_CODE.getTagBytes()));
+        if (value == null || value.length() < 4) {
+            return 0;
         }
 
         return Util.binaryHexCodedDecimalToInt(value);
     }
-    
-    public static byte[] findCurrencyCode(EMVApplication app){
-        if(app != null){
-            if(app.getApplicationCurrencyCode() != -1){
+
+    public static byte[] findCurrencyCode(EMVApplication app) {
+        if (app != null) {
+            if (app.getApplicationCurrencyCode() != -1) {
                 byte[] currencyCode = Util.intToBinaryEncodedDecimalByteArray(app.getApplicationCurrencyCode());
                 return Util.resizeArray(currencyCode, 2);
             }
             Locale preferredLocale = null;
-            if(app.getLanguagePreference() != null){
+            if (app.getLanguagePreference() != null) {
                 preferredLocale = app.getLanguagePreference().getPreferredLocale();
             }
-            if(preferredLocale == null 
-                    && app.getCard() != null 
+            if (preferredLocale == null
+                    && app.getCard() != null
                     && app.getCard().getPSE() != null
-                    && app.getCard().getPSE().getLanguagePreference() != null){
+                    && app.getCard().getPSE().getLanguagePreference() != null) {
                 preferredLocale = app.getCard().getPSE().getLanguagePreference().getPreferredLocale();
             }
-            if(preferredLocale != null){
-                if(preferredLocale.getLanguage().equals(Locale.getDefault().getLanguage())) {
+            if (preferredLocale != null) {
+                if (preferredLocale.getLanguage().equals(Locale.getDefault().getLanguage())) {
                     //Guesstimate; we presume default locale is the preferred
                     preferredLocale = Locale.getDefault();
                 }
                 List<Integer> numericCodes = ISO4217_Numeric.getNumericCodeForLocale(preferredLocale);
                 if (numericCodes != null && numericCodes.size() > 0) {
                     //Just use the first found. It might not be correct, eg Brazil (BRZ) vs Portugal (EUR)
-                    return Util.resizeArray(Util.intToBinaryEncodedDecimalByteArray(numericCodes.get(0)), 2); 
+                    return Util.resizeArray(Util.intToBinaryEncodedDecimalByteArray(numericCodes.get(0)), 2);
                 }
             }
-            
+
         }
         String currencyCode = defaultTerminalProperties.getProperty(Util.byteArrayToHexString(EMVTags.TRANSACTION_CURRENCY_CODE.getTagBytes()));
-        if(currencyCode != null){
+        if (currencyCode != null) {
             return Util.fromHexString(currencyCode);
         }
         return new byte[]{0x08, 0x26};
     }
 
     public static void main(String[] args) {
-        for(String key : defaultTerminalProperties.stringPropertyNames()){
+        for (String key : defaultTerminalProperties.stringPropertyNames()) {
             System.out.println(key + "=" + defaultTerminalProperties.getProperty(key));
             /*if(key.equalsIgnoreCase("9f09"))
             {
@@ -604,28 +598,27 @@ public class EMVTerminal {
             	else
             		System.out.println("SDA not supported");
             }*/
-            
-            if(key.equalsIgnoreCase("9f40"))
-            {
-            	if(isCashbackTrx())
-            		System.out.println("Cashback supported");
-            	else 
-            		System.out.println("Cashback not supported");
-            	
-            	if(isCashTrx())
-            		System.out.println("Cash supported");
-            	else 
-            		System.out.println("Cash not supported");
-            	
-            	if(isGoodsTrx())
-            		System.out.println("Goods supported");
-            	else 
-            		System.out.println("Goods not supported");
-            	
-            	if(isServicesTrx())
-            		System.out.println("Services supported");
-            	else 
-            		System.out.println("Services not supported");
+
+            if (key.equalsIgnoreCase("9f40")) {
+                if (isCashbackTrx())
+                    System.out.println("Cashback supported");
+                else
+                    System.out.println("Cashback not supported");
+
+                if (isCashTrx())
+                    System.out.println("Cash supported");
+                else
+                    System.out.println("Cash not supported");
+
+                if (isGoodsTrx())
+                    System.out.println("Goods supported");
+                else
+                    System.out.println("Goods not supported");
+
+                if (isServicesTrx())
+                    System.out.println("Services supported");
+                else
+                    System.out.println("Services not supported");
             }
         }
         

@@ -16,12 +16,8 @@
 package sasc.emv.system.mastercard;
 
 import sasc.emv.EMVApplication;
-import sasc.iso7816.Tag;
-import sasc.iso7816.TagImpl;
-import sasc.iso7816.TagValueType;
 
 /**
- *
  * @author sasc
  */
 public class MasterCardApplication extends EMVApplication {

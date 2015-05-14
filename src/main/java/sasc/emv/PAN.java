@@ -16,22 +16,23 @@
 package sasc.emv;
 
 import sasc.iso7816.SmartCardException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import sasc.lookup.IIN_DB;
 import sasc.util.ISO3166_1;
 import sasc.util.Log;
 import sasc.util.Util;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 /**
  * See http://en.wikipedia.org/wiki/ISO/IEC_7812
- * 
+ *
  * @author sasc
  */
 public class PAN {
 
     private short mii;
-    
+
     //Issuer Identification Number, aka BIN
     //BIN - Bank Identification Number, commonly (and wrongly) referred to as "Bin Number". 
     //This is the first six digits of the number on many types of card including 
@@ -59,7 +60,7 @@ public class PAN {
         //These data elements are left justified and padded with
         //trailing hexadecimal 'F's.
         int trailingPadIndex = panStr.indexOf('F');
-        if(trailingPadIndex != -1){
+        if (trailingPadIndex != -1) {
             panStr = panStr.substring(0, trailingPadIndex);
         }
         //Check that actual PAN length (without padding, is not longer than 19 digits)
@@ -92,7 +93,7 @@ public class PAN {
         return panStr.charAt(panStr.length() - 1);
     }
 
-    public boolean isValid(){
+    public boolean isValid() {
         return valid;
     }
 
@@ -160,12 +161,12 @@ public class PAN {
         int iinInt = iin.getValue();
         IIN_DB.IIN iinLookup = IIN_DB.searchIIN(iinInt);
         String iinDescription = "";
-        if(iinLookup != null){
-            iinDescription = " ("+iinLookup.getDescription()+")";
+        if (iinLookup != null) {
+            iinDescription = " (" + iinLookup.getDescription() + ")";
         }
         pw.println(indentStr + "Issuer Identifier Number: " + iinInt + iinDescription);
         pw.println(indentStr + "Account Number: " + accountNumber);
-        pw.println(indentStr + "Check Digit: " + getCheckDigit() + " ("+(isValid()?"Valid":"Invalid")+")");
+        pw.println(indentStr + "Check Digit: " + getCheckDigit() + " (" + (isValid() ? "Valid" : "Invalid") + ")");
     }
 
     public static void main(String[] args) {

@@ -15,52 +15,53 @@
  */
 package sasc.emv;
 
-import sasc.iso7816.TagAndLength;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.List;
 import sasc.iso7816.TLVUtil;
+import sasc.iso7816.TagAndLength;
 import sasc.util.Log;
 import sasc.util.Util;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.List;
+
 /**
  * List (in tag and length format) of data objects representing the logged data elements that are passed to the terminal when a transaction log record is read
- * 
+ *
  * @author sasc
  */
 public class LogFormat {
     private List<TagAndLength> formatList;
     private int recordLength = 0;
 
-    public LogFormat(byte[] formatBytes){
+    public LogFormat(byte[] formatBytes) {
         this.formatList = TLVUtil.parseTagAndLength(formatBytes);
-        for(TagAndLength tal : formatList){
-            recordLength+=tal.getLength();
+        for (TagAndLength tal : formatList) {
+            recordLength += tal.getLength();
         }
     }
 
-    public List<TagAndLength> getTagAndLengthList(){
+    public List<TagAndLength> getTagAndLengthList() {
         return formatList;
     }
-    
-    public int getRecordLength(){
+
+    public int getRecordLength() {
         return recordLength;
     }
-    
+
     @Override
-    public String toString(){
+    public String toString() {
         StringWriter sw = new StringWriter();
         dump(new PrintWriter(sw), 0);
         return sw.toString();
     }
 
-    public void dump(PrintWriter pw, int indent){
-        pw.println(Util.getSpaces(indent)+"Log Format:");
-        String indentStr = Util.getSpaces(indent+Log.INDENT_SIZE);
+    public void dump(PrintWriter pw, int indent) {
+        pw.println(Util.getSpaces(indent) + "Log Format:");
+        String indentStr = Util.getSpaces(indent + Log.INDENT_SIZE);
 
-        for(TagAndLength tagAndLength : formatList){
+        for (TagAndLength tagAndLength : formatList) {
             int length = tagAndLength.getLength();
-            pw.println(indentStr+tagAndLength.getTag().getName() + " ("+length+ " "+(length==1?"byte":"bytes")+")");
+            pw.println(indentStr + tagAndLength.getTag().getName() + " (" + length + " " + (length == 1 ? "byte" : "bytes") + ")");
         }
     }
 }

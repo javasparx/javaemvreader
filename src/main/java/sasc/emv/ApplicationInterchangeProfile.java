@@ -15,15 +15,16 @@
  */
 package sasc.emv;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import sasc.util.Log;
 import sasc.util.Util;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 /**
  * Application Interchange Profile
  * Indicates the capabilities of the card to support specific functions in the application
- *
+ * <p/>
  * EMV Book 3 Annex C1 (page 182)
  *
  * @author sasc
@@ -68,80 +69,80 @@ public class ApplicationInterchangeProfile {
 
     //The rest of the bits are RFU (Reserved for Future Use)
 
-    public String getSDASupportedString(){
-        if(isSDASupported()){
+    public String getSDASupportedString() {
+        if (isSDASupported()) {
             return "Static Data Authentication (SDA) supported";
-        }else{
+        } else {
             return "Static Data Authentication (SDA) not supported";
         }
     }
 
-    public String getDDASupportedString(){
-        if(isDDASupported()){
+    public String getDDASupportedString() {
+        if (isDDASupported()) {
             return "Dynamic Data Authentication (DDA) supported";
-        }else{
+        } else {
             return "Dynamic Data Authentication (DDA) not supported";
         }
     }
 
-    public String getCardholderVerificationSupportedString(){
-        if(isCardholderVerificationSupported()){
+    public String getCardholderVerificationSupportedString() {
+        if (isCardholderVerificationSupported()) {
             return "Cardholder verification is supported";
-        }else{
+        } else {
             return "Cardholder verification is not supported";
         }
     }
 
-    public String getTerminalRiskManagementToBePerformedString(){
-        if(isTerminalRiskManagementToBePerformed()){
+    public String getTerminalRiskManagementToBePerformedString() {
+        if (isTerminalRiskManagementToBePerformed()) {
             return "Terminal risk management is to be performed";
-        }else{
+        } else {
             return "Terminal risk management does not need to be performed";
         }
     }
 
-    public String getIssuerAuthenticationIsSupportedString(){
-        if(isIssuerAuthenticationIsSupported()){
+    public String getIssuerAuthenticationIsSupportedString() {
+        if (isIssuerAuthenticationIsSupported()) {
             return "Issuer authentication is supported";
-        }else{
+        } else {
             return "Issuer authentication is not supported";
         }
     }
 
-    public String getCDASupportedString(){
-        if(isCDASupported()){
+    public String getCDASupportedString() {
+        if (isCDASupported()) {
             return "CDA supported";
-        }else{
+        } else {
             return "CDA not supported";
         }
     }
 
-    public byte[] getBytes(){
+    public byte[] getBytes() {
         return new byte[]{firstByte, secondByte};
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         StringWriter sw = new StringWriter();
         dump(new PrintWriter(sw), 0);
         return sw.toString();
     }
 
-    public void dump(PrintWriter pw, int indent){
-        pw.println(Util.getSpaces(indent)+"Application Interchange Profile");
-        String indentStr = Util.getSpaces(indent+Log.INDENT_SIZE);
+    public void dump(PrintWriter pw, int indent) {
+        pw.println(Util.getSpaces(indent) + "Application Interchange Profile");
+        String indentStr = Util.getSpaces(indent + Log.INDENT_SIZE);
 
-        pw.println(indentStr+getSDASupportedString());
-        pw.println(indentStr+getDDASupportedString());
-        pw.println(indentStr+getCardholderVerificationSupportedString());
-        pw.println(indentStr+getTerminalRiskManagementToBePerformedString());
-        pw.println(indentStr+getIssuerAuthenticationIsSupportedString());
-        pw.println(indentStr+getCDASupportedString());
+        pw.println(indentStr + getSDASupportedString());
+        pw.println(indentStr + getDDASupportedString());
+        pw.println(indentStr + getCardholderVerificationSupportedString());
+        pw.println(indentStr + getTerminalRiskManagementToBePerformedString());
+        pw.println(indentStr + getIssuerAuthenticationIsSupportedString());
+        pw.println(indentStr + getCDASupportedString());
     }
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         ApplicationInterchangeProfile aip;
-        aip = new ApplicationInterchangeProfile((byte)0x5c, (byte)0x00);
+        aip = new ApplicationInterchangeProfile((byte) 0x5c, (byte) 0x00);
         System.out.println(aip.toString());
     }
 

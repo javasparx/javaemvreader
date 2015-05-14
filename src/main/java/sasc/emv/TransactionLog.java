@@ -15,16 +15,16 @@
  */
 package sasc.emv;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.List;
 import sasc.iso7816.TagAndLength;
 import sasc.util.Log;
 import sasc.util.Util;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- *
  * @author sasc
  */
 public class TransactionLog {
@@ -32,7 +32,7 @@ public class TransactionLog {
     private LogFormat logFormat;
     private List<Record> logRecords = new ArrayList<Record>();
     private boolean isProcessed = false;
-    
+
     public TransactionLog(LogFormat logFormat) {
         this.logFormat = logFormat;
     }
@@ -50,19 +50,19 @@ public class TransactionLog {
             }
         }
     }
-    
+
     public boolean isEmpty() {
         return logRecords.isEmpty();
     }
-    
+
     public boolean isProcessed() {
         return isProcessed;
     }
-    
+
     public void setProcessed() {
         this.isProcessed = true;
     }
-    
+
     public List<Record> getRecords() {
         return logRecords;
     }
@@ -85,10 +85,10 @@ public class TransactionLog {
 
             for (Record record : logRecords) {
                 //TODO format record
-                record.dump(pw, indent + Log.INDENT_SIZE*2);
+                record.dump(pw, indent + Log.INDENT_SIZE * 2);
             }
         } else {
-            pw.println(Util.getSpaces(indent+Log.INDENT_SIZE*2) + "No Log Records found");
+            pw.println(Util.getSpaces(indent + Log.INDENT_SIZE * 2) + "No Log Records found");
         }
 
     }

@@ -15,26 +15,15 @@
  */
 package sasc.terminal.smartcardio;
 
-import java.lang.reflect.Field;
+import sasc.terminal.*;
+import sasc.util.Log;
+
+import javax.smartcardio.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import javax.smartcardio.Card;
-import javax.smartcardio.CardException;
-import javax.smartcardio.CardTerminal;
-import javax.smartcardio.CardTerminals;
-import javax.smartcardio.TerminalFactory;
-import sasc.smartcard.pcsc.WinErrorCodes;
-import sasc.terminal.CardConnection;
-import sasc.terminal.NoTerminalsAvailableException;
-import sasc.terminal.Terminal;
-import sasc.terminal.TerminalException;
-import sasc.terminal.TerminalProvider;
-import sasc.util.Log;
-import sasc.util.Util;
 
 /**
- *
  * WARNING: This class must not be instantiated, referenced or loaded in any way
  * except via reflection.
  *
@@ -50,14 +39,14 @@ public class SmartcardioTerminalProviderImpl implements TerminalProvider {
         providerInfo = "SmartcardIO[" + factory.getProvider() + "]";
         terminals = factory.terminals();
     }
-    
-    SmartcardioTerminalProviderImpl(CardTerminals cardTerminals, String providerInfo){
+
+    SmartcardioTerminalProviderImpl(CardTerminals cardTerminals, String providerInfo) {
         this.providerInfo = providerInfo;
         this.terminals = cardTerminals;
     }
-    
-    public static TerminalProvider createFromCardTerminals(Object cardTerminals, String providerInfo){
-        return new SmartcardioTerminalProviderImpl((CardTerminals)cardTerminals, providerInfo);
+
+    public static TerminalProvider createFromCardTerminals(Object cardTerminals, String providerInfo) {
+        return new SmartcardioTerminalProviderImpl((CardTerminals) cardTerminals, providerInfo);
     }
 
     @Override
@@ -68,7 +57,7 @@ public class SmartcardioTerminalProviderImpl implements TerminalProvider {
                 list.add(new TerminalImpl(terminal));
             }
         } catch (CardException ex) {
-            if(!SmartcardioUtils.isNoCardReadersAvailable(ex)){ //No card readers available is not an exception, just return empty list
+            if (!SmartcardioUtils.isNoCardReadersAvailable(ex)) { //No card readers available is not an exception, just return empty list
                 throw new TerminalException(ex);
             }
         }
@@ -79,36 +68,35 @@ public class SmartcardioTerminalProviderImpl implements TerminalProvider {
     public CardConnection connectAnyTerminal() throws TerminalException {
         return connectAnyTerminal("*");
     }
-    
-	/**
-	 * For this to work, all other cards in all other attached readers must be removed first
-	 *
-	 */
+
+    /**
+     * For this to work, all other cards in all other attached readers must be removed first
+     */
     @Override
     public CardConnection connectAnyTerminalWithCardPresent(String protocol) throws TerminalException {
         try {
             while (true) {
                 for (CardTerminal smartCardIOTerminal : terminals.list(javax.smartcardio.CardTerminals.State.CARD_PRESENT)) {
-                    Log.debug("SmartcardioProvider Terminal: "+smartCardIOTerminal.getName());
+                    Log.debug("SmartcardioProvider Terminal: " + smartCardIOTerminal.getName());
                     Card _card = smartCardIOTerminal.connect(protocol); //if proto, eg T=1, is specified and not supported by card: throws PCSCException SCARD_E_PROTO_MISMATCH
-                    Log.debug("Connected to card using protocol: "+_card.getProtocol());
+                    Log.debug("Connected to card using protocol: " + _card.getProtocol());
 
                     return new SmartcardioCardConnection(_card, smartCardIOTerminal);
                 }
                 boolean changeOccurred = terminals.waitForChange(200);
-                if(!changeOccurred){ //Timeout
-                    if(Thread.currentThread().isInterrupted()) {
+                if (!changeOccurred) { //Timeout
+                    if (Thread.currentThread().isInterrupted()) {
                         return null;
                     }
                     continue; //waitForChange again
                 }
             }
         } catch (CardException ex) {
-            if(SmartcardioUtils.isNoCardReadersAvailable(ex)){ //No card readers available
+            if (SmartcardioUtils.isNoCardReadersAvailable(ex)) { //No card readers available
                 throw new NoTerminalsAvailableException(ex);
             }
             throw new TerminalException(SmartcardioUtils.getPCSCErrorDescription(ex), ex);
-        } catch (IllegalStateException ex){
+        } catch (IllegalStateException ex) {
             throw new TerminalException(ex);
         }
     }
@@ -121,25 +109,25 @@ public class SmartcardioTerminalProviderImpl implements TerminalProvider {
             //wait for a card to be inserted
             while (true) {
                 boolean changeOccurred = terminals.waitForChange(200);
-                if(!changeOccurred){ //Timeout
-                    if(Thread.currentThread().isInterrupted()){
+                if (!changeOccurred) { //Timeout
+                    if (Thread.currentThread().isInterrupted()) {
                         return null;
                     }
                     continue; //waitForChange again
                 }
                 for (CardTerminal smartCardIOTerminal : terminals.list(javax.smartcardio.CardTerminals.State.CARD_INSERTION)) {
                     Card _card = smartCardIOTerminal.connect(protocol); //if proto, eg T=1, is specified and not supported by card: throws PCSCException SCARD_E_PROTO_MISMATCH
-                    Log.debug("Connected to card using protocol: "+_card.getProtocol());
-                    Log.debug("Terminal: "+smartCardIOTerminal.getName());
+                    Log.debug("Connected to card using protocol: " + _card.getProtocol());
+                    Log.debug("Terminal: " + smartCardIOTerminal.getName());
                     return new SmartcardioCardConnection(_card, smartCardIOTerminal);
                 }
             }
         } catch (CardException ex) {
-            if(SmartcardioUtils.isNoCardReadersAvailable(ex)){ //No card readers available 
+            if (SmartcardioUtils.isNoCardReadersAvailable(ex)) { //No card readers available
                 throw new NoTerminalsAvailableException(ex);
             }
             throw new TerminalException(SmartcardioUtils.getPCSCErrorDescription(ex), ex);
-        } catch (IllegalStateException ex){
+        } catch (IllegalStateException ex) {
             throw new TerminalException(ex);
         }
     }
@@ -152,7 +140,7 @@ public class SmartcardioTerminalProviderImpl implements TerminalProvider {
             return new SmartcardioCardConnection(_card, smartCardIOTerminal);
         } catch (CardException ex) {
             throw new TerminalException(ex);
-        } 
+        }
     }
 
     @Override
@@ -163,7 +151,7 @@ public class SmartcardioTerminalProviderImpl implements TerminalProvider {
             return new SmartcardioCardConnection(_card, smartCardIOTerminal);
         } catch (CardException ex) {
             throw new TerminalException(ex);
-        } catch (IndexOutOfBoundsException ex){
+        } catch (IndexOutOfBoundsException ex) {
             throw new TerminalException(ex);
         }
     }
@@ -191,32 +179,32 @@ public class SmartcardioTerminalProviderImpl implements TerminalProvider {
                 throw new TerminalException(ex);
             }
         }
-        
+
         @Override
         public boolean isCardPresent() throws TerminalException {
-            try{
+            try {
                 return smartCardIOTerminal.isCardPresent();
-            }catch(CardException ex){
+            } catch (CardException ex) {
                 throw new TerminalException(ex);
-            }catch (IllegalStateException ex){
+            } catch (IllegalStateException ex) {
                 throw new TerminalException(ex);
             }
         }
-        
+
         @Override
-        public String getName(){
+        public String getName() {
             return smartCardIOTerminal.getName();
         }
 
         @Override
         public String getTerminalInfo() {
             String cardPresent = null;
-            try{
-                cardPresent = smartCardIOTerminal.isCardPresent()?"Card Present":"No card present";
-            }catch(CardException ex){
+            try {
+                cardPresent = smartCardIOTerminal.isCardPresent() ? "Card Present" : "No card present";
+            } catch (CardException ex) {
                 //Ignore
             }
-            return "Name: "+smartCardIOTerminal.getName() + " (Description: "+smartCardIOTerminal.toString()+") "+cardPresent;
+            return "Name: " + smartCardIOTerminal.getName() + " (Description: " + smartCardIOTerminal.toString() + ") " + cardPresent;
         }
-    }    
+    }
 }

@@ -15,13 +15,10 @@
  */
 package sasc.smartcard.common;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 import sasc.iso7816.AID;
 import sasc.util.Util;
+
+import java.util.*;
 
 /**
  * A place to register handlers for specific ATR/AID patterns.
@@ -29,37 +26,37 @@ import sasc.util.Util;
  * A handler may choose to handle at ATR or AID exclusively:
  * -If ATR: then processing stops for this card
  * -If AID: then processing stops for this AID
- * 
+ * <p/>
  * ATR and AID patterns are matched using Regular Expressions
- * 
+ *
  * @author sasc
  */
 public class Registry {
     private static final Registry INSTANCE = new Registry();
-    
+
     private Map<String, AtrHandler> atrHandlers = Collections.synchronizedMap(new LinkedHashMap<String, AtrHandler>());
     private Map<String, ApplicationHandler> aidHandlers = Collections.synchronizedMap(new LinkedHashMap<String, ApplicationHandler>());
 //    private Map<AID, ApplicationHandler> aidHandlers = Collections.synchronizedMap(new LinkedHashMap<AID, ApplicationHandler>());
-    
+
     public static Registry getInstance() {
         return INSTANCE;
     }
-    
+
     public void registerAtrHandler(AtrHandler atrHandler, String atrPattern) {
         atrHandlers.put(atrPattern, atrHandler);
     }
-    
+
     public void registerAtrHandler(AtrHandler atrHandler, List<String> atrPatterns) {
-        for(String pattern : atrPatterns) {
+        for (String pattern : atrPatterns) {
             atrHandlers.put(pattern, atrHandler);
         }
     }
-    
+
     public void registerAidHandler(ApplicationHandler aidHandler, String aidPattern) {
         byte[] aidPatternBytes = Util.fromHexString(aidPattern); //Sanitize
         aidHandlers.put(Util.prettyPrintHexNoWrap(aidPatternBytes).toUpperCase(), aidHandler);
     }
-    
+
     public void registerAidHandler(ApplicationHandler aidHandler, AID aid) {
         registerAidHandler(aidHandler, Util.byteArrayToHexString(aid.getAIDBytes()));
     }
@@ -71,24 +68,24 @@ public class Registry {
     public List<ApplicationHandler> getHandlersForAid(byte[] aid) {
         List<ApplicationHandler> handlers = new ArrayList<ApplicationHandler>();
         String aidStr = Util.prettyPrintHexNoWrap(aid).toUpperCase();
-        for(String aidPatternStr : aidHandlers.keySet()) {
-            if(aidStr.matches("^"+aidPatternStr+"$")){
+        for (String aidPatternStr : aidHandlers.keySet()) {
+            if (aidStr.matches("^" + aidPatternStr + "$")) {
                 ApplicationHandler handler = aidHandlers.get(aidPatternStr);
-                if(handler != null){
+                if (handler != null) {
                     handlers.add(handler);
                 }
             }
         }
         return handlers;
     }
-    
+
     public List<AtrHandler> getHandlersForAtr(byte[] atr) {
         List<AtrHandler> handlers = new ArrayList<AtrHandler>();
         String atrStr = Util.prettyPrintHexNoWrap(atr).toUpperCase();
-        for(String atrPatternStr : atrHandlers.keySet()){
-            if(atrStr.matches("^"+atrPatternStr+"$")){
+        for (String atrPatternStr : atrHandlers.keySet()) {
+            if (atrStr.matches("^" + atrPatternStr + "$")) {
                 AtrHandler handler = atrHandlers.get(atrPatternStr);
-                if(handler != null){
+                if (handler != null) {
                     handlers.add(handler);
                 }
             }

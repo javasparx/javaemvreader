@@ -15,15 +15,15 @@
  */
 package sasc.smartcard.app.yubikey;
 
-import java.io.PrintWriter;
-import sasc.smartcard.common.SmartCard;
 import sasc.iso7816.AID;
 import sasc.iso7816.Application;
+import sasc.smartcard.common.SmartCard;
 import sasc.util.Log;
 import sasc.util.Util;
 
+import java.io.PrintWriter;
+
 /**
- *
  * @author sasc
  */
 public class YubikeyNeoApplication implements Application {
@@ -45,24 +45,24 @@ public class YubikeyNeoApplication implements Application {
     public SmartCard getCard() {
         return card;
     }
-    
-    public static enum Mode{
+
+    public static enum Mode {
         OTP(1), CCID(2), OTP_CCID(3);
-        
-        Mode(int modeInt){
-            
+
+        Mode(int modeInt) {
+
         }
     }
-    
-    public YubikeyNeoApplication(AID aid){
+
+    public YubikeyNeoApplication(AID aid) {
         this.aid = aid;
     }
-    
+
     @Override
     public AID getAID() {
         return aid;
     }
-    
+
     /**
      * @return the versionMajor
      */
@@ -132,7 +132,7 @@ public class YubikeyNeoApplication implements Application {
     public void setTouchDetectorLevel(int touchDetectorLevel) {
         this.touchDetectorLevel = touchDetectorLevel;
     }
-    
+
     /**
      * @return the modeByte
      */
@@ -165,7 +165,7 @@ public class YubikeyNeoApplication implements Application {
      * @return the flags
      */
     public byte getFlags() {
-        return (byte)(modeByte & ~Yubikey.MODE_MASK);
+        return (byte) (modeByte & ~Yubikey.MODE_MASK);
     }
 
 //    /**
@@ -202,38 +202,38 @@ public class YubikeyNeoApplication implements Application {
     public void setAutoEjectTime(int autoEjectTime) {
         this.autoEjectTime = autoEjectTime;
     }
-    
+
     @Override
     public void dump(PrintWriter pw, int indent) {
         pw.println(Util.getSpaces(indent) + "Yubikey NEO Admin Application");
 
         String indentStr = Util.getSpaces(indent + Log.INDENT_SIZE);
-        
+
         if (aid != null) {
             aid.dump(pw, indent + Log.INDENT_SIZE);
         }
-        
-        pw.println(indentStr+"Firmware Version           : "+getVersionMajor()+"."+getVersionMinor()+"."+getVersionBuild());
-        pw.println(indentStr+"Programming sequence number: "+getProgrammingSeqNum());
-        pw.println(indentStr+"Level from touch detector  : "+getTouchDetectorLevel());
+
+        pw.println(indentStr + "Firmware Version           : " + getVersionMajor() + "." + getVersionMinor() + "." + getVersionBuild());
+        pw.println(indentStr + "Programming sequence number: " + getProgrammingSeqNum());
+        pw.println(indentStr + "Level from touch detector  : " + getTouchDetectorLevel());
         int mode = getDeviceMode();
         String modeDescription = "";
-        if(mode == 0){
+        if (mode == 0) {
             modeDescription = " (OTP)";
-        }else if(mode == 1){
+        } else if (mode == 1) {
             modeDescription = " (CCID)";
-        }else if(mode == 2){
+        } else if (mode == 2) {
             modeDescription = " (OTP+CCID)";
         }
         byte flagsByte = getFlags();
         String flagsDescription = "";
-        if(flagsByte == (byte)0x80){
+        if (flagsByte == (byte) 0x80) {
             flagsDescription = " (Eject)";
         }
-        
-        pw.println(indentStr+"Device mode                : "+mode + modeDescription); //getDeviceMode();
-        pw.println(indentStr+"Flags                      : 0x"+Util.byte2Hex(flagsByte) + flagsDescription); //getFlags();
-        pw.println(indentStr+"Challenge-response timeout : "+getChallengeResponseTimeout() + " seconds");
-        pw.println(indentStr+"Auto eject time in seconds : "+getAutoEjectTime());
+
+        pw.println(indentStr + "Device mode                : " + mode + modeDescription); //getDeviceMode();
+        pw.println(indentStr + "Flags                      : 0x" + Util.byte2Hex(flagsByte) + flagsDescription); //getFlags();
+        pw.println(indentStr + "Challenge-response timeout : " + getChallengeResponseTimeout() + " seconds");
+        pw.println(indentStr + "Auto eject time in seconds : " + getAutoEjectTime());
     }
 }

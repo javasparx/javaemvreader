@@ -15,8 +15,9 @@
  */
 package sasc.iso7816;
 
-import java.util.Arrays;
 import sasc.util.Util;
+
+import java.util.Arrays;
 
 /**
  * Registered Application Provider Identifier
@@ -29,17 +30,17 @@ public class RID {
     private String applicant;
     private String country;
 
-    public RID(byte[] rid, String applicant, String country){
-        if (rid == null){
+    public RID(byte[] rid, String applicant, String country) {
+        if (rid == null) {
             throw new IllegalArgumentException("Argument 'rid' cannot be null");
         }
         if (rid.length != 5) {
             throw new SmartCardException("RID length != 5. Length=" + rid.length);
         }
-        if(applicant == null){
+        if (applicant == null) {
             applicant = "";
         }
-        if(country == null){
+        if (country == null) {
             country = "";
         }
         this.rid = rid;
@@ -55,11 +56,11 @@ public class RID {
         return Arrays.copyOf(rid, rid.length);
     }
 
-    public String getApplicant(){
+    public String getApplicant() {
         return applicant;
     }
 
-    public String getCountry(){
+    public String getCountry() {
         return country;
     }
 

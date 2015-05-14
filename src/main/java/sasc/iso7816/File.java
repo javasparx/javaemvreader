@@ -16,7 +16,6 @@
 package sasc.iso7816;
 
 /**
- *
  * @author sasc
  */
 public interface File {

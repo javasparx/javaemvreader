@@ -18,7 +18,6 @@ package sasc.util;
 import java.util.Properties;
 
 /**
- *
  * @author sasc
  */
 public class BuildProperties {
@@ -34,11 +33,11 @@ public class BuildProperties {
         }
     }
 
-    public static String getProperty(String name){
+    public static String getProperty(String name) {
         return buildProps.getProperty(name);
     }
 
-    public static String getProperty(String name, String defaultValue){
+    public static String getProperty(String name, String defaultValue) {
         return buildProps.getProperty(name, defaultValue);
     }
 }

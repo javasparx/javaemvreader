@@ -16,17 +16,17 @@
 package sasc.emv;
 
 import sasc.iso7816.SmartCardException;
+import sasc.util.Log;
+import sasc.util.Util;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import sasc.util.Log;
-import sasc.util.Util;
 
 /**
- *
  * @author sasc
  */
 public class ICCPinEnciphermentPublicKeyCertificate {
@@ -72,15 +72,15 @@ public class ICCPinEnciphermentPublicKeyCertificate {
         validationPerformed = true;
 
         if (issuerPublicKeyCert == null) {
-			issuerPublicKeyCert = application.getIssuerPublicKeyCertificate();
-		}
+            issuerPublicKeyCert = application.getIssuerPublicKeyCertificate();
+        }
 
-        if (issuerPublicKeyCert == null){
+        if (issuerPublicKeyCert == null) {
             //No isser public key cert found
             return isValid();
         }
 
-        if(!issuerPublicKeyCert.validate()){ //Init the cert
+        if (!issuerPublicKeyCert.validate()) { //Init the cert
             isValid = false;
             return isValid();
         }
@@ -90,7 +90,7 @@ public class ICCPinEnciphermentPublicKeyCertificate {
         byte[] recoveredBytes = Util.performRSA(signedBytes, issuerPublicKey.getExponent(), issuerPublicKey.getModulus());
 
         ByteArrayInputStream bis = new ByteArrayInputStream(recoveredBytes);
-        
+
         if (bis.read() != 0x6a) { //Header
             throw new SmartCardException("Header != 0x6a");
         }
@@ -117,7 +117,7 @@ public class ICCPinEnciphermentPublicKeyCertificate {
 
         int modBytesLength = bis.available() - 21;
 
-        if(iccPublicKeyModLengthTotal < modBytesLength) {
+        if (iccPublicKeyModLengthTotal < modBytesLength) {
             //The mod bytes block in the cert contains padding
             //we don't want padding in our key
             modBytesLength = iccPublicKeyModLengthTotal;
@@ -131,7 +131,7 @@ public class ICCPinEnciphermentPublicKeyCertificate {
 
         //Now read padding bytes (0xbb), if available
         //The padding bytes are not used
-        byte[] padding = new byte[bis.available()-21];
+        byte[] padding = new byte[bis.available() - 21];
         bis.read(padding, 0, padding.length);
 
         bis.read(hash, 0, hash.length);
@@ -143,23 +143,23 @@ public class ICCPinEnciphermentPublicKeyCertificate {
         hashStream.write(pan, 0, pan.length);
         hashStream.write(certExpirationDate, 0, certExpirationDate.length);
         hashStream.write(certSerialNumber, 0, certSerialNumber.length);
-        hashStream.write((byte)hashAlgorithmIndicator);
-        hashStream.write((byte)iccPublicKeyAlgorithmIndicator);
-        hashStream.write((byte)iccPublicKeyModLengthTotal);
-        hashStream.write((byte)iccPublicKeyExpLengthTotal);
+        hashStream.write((byte) hashAlgorithmIndicator);
+        hashStream.write((byte) iccPublicKeyAlgorithmIndicator);
+        hashStream.write((byte) iccPublicKeyModLengthTotal);
+        hashStream.write((byte) iccPublicKeyExpLengthTotal);
         byte[] ipkModulus = iccPublicKey.getModulus();
-        int numPadBytes = issuerPublicKey.getModulus().length-42-ipkModulus.length;
-        Log.debug("issuerMod: "+issuerPublicKey.getModulus().length + " iccMod: "+ipkModulus.length + " padBytes: "+numPadBytes);
-        if(numPadBytes > 0){
+        int numPadBytes = issuerPublicKey.getModulus().length - 42 - ipkModulus.length;
+        Log.debug("issuerMod: " + issuerPublicKey.getModulus().length + " iccMod: " + ipkModulus.length + " padBytes: " + numPadBytes);
+        if (numPadBytes > 0) {
             //If NIC <= NI – 42, consists of the full
             //ICC Public Key padded to the right
             //with NI – 42 – NIC bytes of value
             //'BB'
             hashStream.write(ipkModulus, 0, ipkModulus.length);
-            for(int i=0; i<numPadBytes; i++){
-                hashStream.write((byte)0xBB);
+            for (int i = 0; i < numPadBytes; i++) {
+                hashStream.write((byte) 0xBB);
             }
-        }else{
+        } else {
             //If NIC > NI – 42, consists of the NI –
             //42 most significant bytes of the
             //ICC Public Key
@@ -174,7 +174,7 @@ public class ICCPinEnciphermentPublicKeyCertificate {
         hashStream.write(offlineAuthenticationRecords, 0, offlineAuthenticationRecords.length);
         //Trailer not included in hash
 
-        Log.debug("HashStream:\n"+Util.prettyPrintHex(hashStream.toByteArray()));
+        Log.debug("HashStream:\n" + Util.prettyPrintHex(hashStream.toByteArray()));
 
         byte[] sha1Result = null;
         try {
@@ -215,7 +215,7 @@ public class ICCPinEnciphermentPublicKeyCertificate {
         pw.println(Util.getSpaces(indent) + "ICC PIN Encipherment Public Key Certificate");
         String indentStr = Util.getSpaces(indent + Log.INDENT_SIZE);
 
-        if(!validationPerformed){
+        if (!validationPerformed) {
             validate();
         }
 
@@ -225,21 +225,21 @@ public class ICCPinEnciphermentPublicKeyCertificate {
             pw.println(indentStr + "Certificate Format: " + certFormat);
             pw.println(indentStr + "Certificate Expiration Date (MMYY): " + Util.byteArrayToHexString(certExpirationDate));
             pw.println(indentStr + "Certificate Serial Number: " + Util.byteArrayToHexString(certSerialNumber));
-            pw.println(indentStr + "Hash Algorithm Indicator: " + hashAlgorithmIndicator +" (=SHA-1)");
-            pw.println(indentStr + "ICC Public Key Algorithm Indicator: " + iccPublicKeyAlgorithmIndicator +" (=RSA)");
+            pw.println(indentStr + "Hash Algorithm Indicator: " + hashAlgorithmIndicator + " (=SHA-1)");
+            pw.println(indentStr + "ICC Public Key Algorithm Indicator: " + iccPublicKeyAlgorithmIndicator + " (=RSA)");
             pw.println(indentStr + "Hash: " + Util.byteArrayToHexString(hash));
 
             iccPublicKey.dump(pw, indent + Log.INDENT_SIZE);
         } else {
             if (this.issuerPublicKeyCert == null) {
                 pw.println(indentStr + "NO ISSUER CERTIFICATE FOUND. UNABLE TO VALIDATE CERTIFICATE");
-			} else {
-				pw.println(indentStr + "CERTIFICATE NOT VALID");
-			}
+            } else {
+                pw.println(indentStr + "CERTIFICATE NOT VALID");
+            }
         }
     }
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
 
     }
 }

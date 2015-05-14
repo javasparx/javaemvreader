@@ -15,19 +15,16 @@
  */
 package sasc.smartcard.common;
 
-import sasc.iso7816.MasterFile;
-import sasc.iso7816.BERTLV;
-import sasc.iso7816.AID;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.*;
-import sasc.iso7816.ATR;
 import sasc.emv.DDF;
 import sasc.emv.EMVApplication;
-import sasc.iso7816.Application;
+import sasc.iso7816.*;
 import sasc.terminal.KnownAIDList;
 import sasc.util.Log;
 import sasc.util.Util;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.*;
 
 /**
  * A representation of all the data discovered on a smart card.
@@ -37,11 +34,10 @@ import sasc.util.Util;
  * -contain a Master File (according to ISO7816-4)
  * -contain a default selected Application (ISO7816-4 or proprietary)
  * -contain other selectable files, either proprietary or according to ISO7816
- *
+ * <p/>
  * This class should not contain any transient state, like connection state. Its just a POJO
  *
  * @author sasc
- *
  */
 public class SmartCard {
 
@@ -61,40 +57,39 @@ public class SmartCard {
     private boolean allKnownAidsProbed = false;
 
     //Use info from ATR, PSE/PPSE presence etc to guess interface type
-    public enum Type{
+    public enum Type {
         CONTACTED, CONTACTLESS, UNKNOWN;
     }
 
     public SmartCard(ATR atr) {
-        if(atr == null){
+        if (atr == null) {
             throw new IllegalArgumentException("Argument atr cannot be null");
         }
         atrSet.add(atr);
     }
 
-    public void setType(Type type){
+    public void setType(Type type) {
         this.type = type;
     }
 
-    public Type getType(){
+    public Type getType() {
         return type;
     }
 
-    public boolean allKnownAidsProbed(){
+    public boolean allKnownAidsProbed() {
         return allKnownAidsProbed;
     }
 
-    public void setAllKnownAidsProbed(){
+    public void setAllKnownAidsProbed() {
         allKnownAidsProbed = true;
     }
 
     /**
-     *
      * @return the final ATR (cold or warm)
      */
-    public ATR getATR(){
+    public ATR getATR() {
         ATR last = null;
-        for(ATR atr : atrSet){
+        for (ATR atr : atrSet) {
             last = atr;
         }
         return last;
@@ -104,9 +99,10 @@ public class SmartCard {
      * TODO
      * The first item is the cold ATR
      * Any subsequent ATRs (if present) are warm ATRs
+     *
      * @return Set of ATRs (cold and warm (if present))
      */
-    public Set<ATR> getATRs(){
+    public Set<ATR> getATRs() {
         return Collections.unmodifiableSet(atrSet);
     }
 
@@ -123,25 +119,25 @@ public class SmartCard {
 //        if (applicationsMap.containsKey(app.getAID())) {
 //            throw new IllegalArgumentException("EMVApplication already added: " + app.getAID() + " " + app.getPreferredName());
 //        }
-        if(app.getAID() == null){
+        if (app.getAID() == null) {
             throw new IllegalArgumentException("Invalid EMVApplication object: AID == null");
         }
-        Log.debug("ADDING EMV aid: "+Util.prettyPrintHexNoWrap(app.getAID().getAIDBytes()));
-        if(app.getCard() == null){
+        Log.debug("ADDING EMV aid: " + Util.prettyPrintHexNoWrap(app.getAID().getAIDBytes()));
+        if (app.getCard() == null) {
             app.setCard(this);
         }
         emvApplicationsMap.put(app.getAID(), app);
     }
 
     public void addApplication(Application app) {
-        if(app == null) {
+        if (app == null) {
             throw new IllegalArgumentException("Param app cannot be null");
         }
-        if(app.getAID() == null){
+        if (app.getAID() == null) {
             throw new IllegalArgumentException("Invalid Application object: AID == null");
         }
-        if(app instanceof EMVApplication) {
-            addEMVApplication((EMVApplication)app);
+        if (app instanceof EMVApplication) {
+            addEMVApplication((EMVApplication) app);
         } else {
             otherApplicationsMap.put(app.getAID(), app);
         }
@@ -170,18 +166,18 @@ public class SmartCard {
         return Collections.unmodifiableCollection(apps);
     }
 
-    public void addAID(AID aid){
+    public void addAID(AID aid) {
         allAIDs.add(aid);
 
         KnownAIDList.KnownAID knownAID = KnownAIDList.searchAID(aid.getAIDBytes());
-        if(knownAID != null){
+        if (knownAID != null) {
             String type = knownAID.getType();
-            if("EMV".equalsIgnoreCase(type)){
+            if ("EMV".equalsIgnoreCase(type)) {
                 EMVApplication emvApp = new EMVApplication();
                 emvApp.setAID(aid);
                 emvApp.setCard(this);
                 addEMVApplication(emvApp);
-            }else if("GP".equalsIgnoreCase(type)){
+            } else if ("GP".equalsIgnoreCase(type)) {
                 //TODO
             }
         } else {
@@ -189,7 +185,7 @@ public class SmartCard {
         }
     }
 
-    public Set<AID> getAllAIDs(){
+    public Set<AID> getAllAIDs() {
         return Collections.unmodifiableSet(allAIDs);
     }
 
@@ -219,13 +215,13 @@ public class SmartCard {
     //Dump all information read from the card
     public void dump(PrintWriter pw, int indent) {
 
-        for(ATR atr : atrSet){
+        for (ATR atr : atrSet) {
             atr.dump(pw, indent);
         }
 
         pw.println("");
 
-        pw.println(Util.getSpaces(indent+Log.INDENT_SIZE) + "Interface Type: "+type);
+        pw.println(Util.getSpaces(indent + Log.INDENT_SIZE) + "Interface Type: " + type);
 
         if (mf != null) {
             mf.dump(pw, indent + Log.INDENT_SIZE);
@@ -241,44 +237,44 @@ public class SmartCard {
             pw.println(Util.getSpaces(indent + Log.INDENT_SIZE) + "UNHANDLED GLOBAL RECORDS (" + unhandledRecords.size() + " found):");
 
             for (BERTLV tlv : unhandledRecords) {
-                pw.println(Util.getSpaces(indent + Log.INDENT_SIZE*2) + tlv.getTag() + " " + tlv);
+                pw.println(Util.getSpaces(indent + Log.INDENT_SIZE * 2) + tlv.getTag() + " " + tlv);
             }
         }
         pw.println("");
 
         pw.println("");
-        pw.println(Util.getSpaces(indent + Log.INDENT_SIZE*2) + "EMV applications (" + getEmvApplications().size() + " found):");
+        pw.println(Util.getSpaces(indent + Log.INDENT_SIZE * 2) + "EMV applications (" + getEmvApplications().size() + " found):");
         pw.println("");
 
         for (EMVApplication app : getEmvApplications()) {
-            app.dump(pw, indent + Log.INDENT_SIZE*3);
+            app.dump(pw, indent + Log.INDENT_SIZE * 3);
         }
 
-        if(otherApplicationsMap.size() > 0){
+        if (otherApplicationsMap.size() > 0) {
             pw.println("");
-            pw.println(Util.getSpaces(indent + Log.INDENT_SIZE*2) + "Other Applications (" + otherApplicationsMap.size() + " found):");
+            pw.println(Util.getSpaces(indent + Log.INDENT_SIZE * 2) + "Other Applications (" + otherApplicationsMap.size() + " found):");
             pw.println("");
 
-            for (Application app : otherApplicationsMap.values()){
-                app.dump(pw, indent + Log.INDENT_SIZE*3);
+            for (Application app : otherApplicationsMap.values()) {
+                app.dump(pw, indent + Log.INDENT_SIZE * 3);
                 pw.println("");
             }
         }
         Set<AID> unhandledAIDs = new HashSet<AID>();
-		for(AID aid : allAIDs) {
-			if(!emvApplicationsMap.containsKey(aid) && !otherApplicationsMap.containsKey(aid)) {
-				unhandledAIDs.add(aid);
-			}
-		}
-		if(unhandledAIDs.size() > 0){
-			pw.println("");
-			pw.println(Util.getSpaces(indent + Log.INDENT_SIZE*2) + "Unhandled AIDs (" + otherApplicationsMap.size() + " found):");
-			pw.println("");
+        for (AID aid : allAIDs) {
+            if (!emvApplicationsMap.containsKey(aid) && !otherApplicationsMap.containsKey(aid)) {
+                unhandledAIDs.add(aid);
+            }
+        }
+        if (unhandledAIDs.size() > 0) {
+            pw.println("");
+            pw.println(Util.getSpaces(indent + Log.INDENT_SIZE * 2) + "Unhandled AIDs (" + otherApplicationsMap.size() + " found):");
+            pw.println("");
 
-			for (AID unhandledAID : unhandledAIDs){
-				unhandledAID.dump(pw, indent + Log.INDENT_SIZE*3);
-				pw.println("");
-			}
+            for (AID unhandledAID : unhandledAIDs) {
+                unhandledAID.dump(pw, indent + Log.INDENT_SIZE * 3);
+                pw.println("");
+            }
         }
         pw.flush();
     }

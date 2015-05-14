@@ -15,18 +15,20 @@
  */
 package sasc.iso7816;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.Arrays;
 import sasc.lookup.RID_DB;
 import sasc.terminal.KnownAIDList;
 import sasc.util.Log;
 import sasc.util.Util;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Arrays;
+
 /**
  * Application Identifier (AID)
- *
+ * <p/>
  * See EMV Book 1 page 153
+ *
  * @author sasc
  */
 public class AID {
@@ -37,7 +39,7 @@ public class AID {
     private byte[] pix;
 
     public AID(byte[] rid, byte[] pix) {
-        if (rid == null || pix == null){
+        if (rid == null || pix == null) {
             throw new IllegalArgumentException("Arguments 'rid' and 'pix' cannot be null");
         }
         if (rid.length != 5) {
@@ -51,7 +53,7 @@ public class AID {
     }
 
     public AID(byte[] aid) {
-        if (aid == null){
+        if (aid == null) {
             throw new IllegalArgumentException("Argument 'aid' cannot be null");
         }
         if (aid.length < 5) {
@@ -62,7 +64,7 @@ public class AID {
         }
         rid = new byte[5];
         System.arraycopy(aid, 0, rid, 0, rid.length);
-        pix = new byte[aid.length-rid.length];
+        pix = new byte[aid.length - rid.length];
         System.arraycopy(aid, rid.length, pix, 0, pix.length);
 
     }
@@ -91,20 +93,20 @@ public class AID {
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         StringWriter sw = new StringWriter();
         dump(new PrintWriter(sw), 0);
         return sw.toString();
     }
 
-    public void dump(PrintWriter pw, int indent){
+    public void dump(PrintWriter pw, int indent) {
         KnownAIDList.KnownAID knownAID = KnownAIDList.searchAID(getAIDBytes());
         String aidName = "";
-        if(knownAID != null){
-            aidName = " ("+knownAID.getName()+")";
+        if (knownAID != null) {
+            aidName = " (" + knownAID.getName() + ")";
         }
-        pw.println(Util.getSpaces(indent)+"AID: "+Util.prettyPrintHexNoWrap(getAIDBytes()) + aidName);
-        String indentStr = Util.getSpaces(indent+Log.INDENT_SIZE);
+        pw.println(Util.getSpaces(indent) + "AID: " + Util.prettyPrintHexNoWrap(getAIDBytes()) + aidName);
+        String indentStr = Util.getSpaces(indent + Log.INDENT_SIZE);
 
         RID ridFromDB = RID_DB.searchRID(rid);
         String description = "";
@@ -112,20 +114,20 @@ public class AID {
             description = " (" + ridFromDB.getApplicant() + " [" + ridFromDB.getCountry() + "])";
         }
 
-        pw.println(indentStr+"RID: "+Util.prettyPrintHexNoWrap(rid) + description);
-        pw.println(indentStr+"PIX: "+Util.prettyPrintHexNoWrap(pix));
+        pw.println(indentStr + "RID: " + Util.prettyPrintHexNoWrap(rid) + description);
+        pw.println(indentStr + "PIX: " + Util.prettyPrintHexNoWrap(pix));
     }
 
     @Override
-    public boolean equals(Object obj){
-        if(!(obj instanceof AID)){
+    public boolean equals(Object obj) {
+        if (!(obj instanceof AID)) {
             return false;
         }
-        AID that = (AID)obj;
-        if(this == that){
+        AID that = (AID) obj;
+        if (this == that) {
             return true;
         }
-        if(Arrays.equals(this.getAIDBytes(), that.getAIDBytes())){
+        if (Arrays.equals(this.getAIDBytes(), that.getAIDBytes())) {
             return true;
         }
 

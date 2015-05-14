@@ -18,18 +18,14 @@ package sasc.util;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.StringTokenizer;
+import java.util.*;
 
 /**
  * ISO 4217
  * ISO 3-digit Currency Code
- *
+ * <p/>
  * http://www.iso.org/iso/support/faqs/faqs_widely_used_standards/widely_used_standards_other/currency_codes/currency_codes_list-1.htm
- *
+ * <p/>
  * java.util.Currency is pretty useless in java 1.6. Must wait for java 1.7 to get the methods:
  * getDisplayName()
  * getNumericCode()
@@ -110,7 +106,7 @@ public class ISO4217_Numeric {
                     codeList.add(ISO4217_Numeric.getNumericCodeForCurrencyCode(currencyCode));
                 }
             }
-        }else if (locale.getCountry() != null && locale.getCountry().length() == 2) {
+        } else if (locale.getCountry() != null && locale.getCountry().length() == 2) {
             String currencyCode = java.util.Currency.getInstance(locale).getCurrencyCode();
             codeList.add(ISO4217_Numeric.getNumericCodeForCurrencyCode(currencyCode));
         }

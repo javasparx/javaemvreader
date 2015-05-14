@@ -18,35 +18,35 @@ package sasc.terminal;
 import sasc.terminal.smartcardio.SmartcardioTerminalProvider;
 
 /**
- *
  * @author sasc
  */
 public class TerminalAPIManager {
 
-    public enum SelectionPolicy{
+    public enum SelectionPolicy {
         ANY_PROVIDER("Any Provider"), SMARTCARD_IO_API("SmartcardIO API");
 
         private String name;
-        private SelectionPolicy(String name){ //Strategy
+
+        private SelectionPolicy(String name) { //Strategy
             this.name = name;
         }
 
-        public String getPolicyName(){
+        public String getPolicyName() {
             return name;
         }
     }
 
-    public static TerminalProvider getProvider(SelectionPolicy choice) throws TerminalException{
+    public static TerminalProvider getProvider(SelectionPolicy choice) throws TerminalException {
         boolean findAnyProvider = false;
-        switch(choice){
+        switch (choice) {
             case ANY_PROVIDER:
                 findAnyProvider = true;
                 //fall through (providers are listed in priority)
             case SMARTCARD_IO_API:
-                if(SmartcardioTerminalProvider.isSmartcardioAvailable()){
+                if (SmartcardioTerminalProvider.isSmartcardioAvailable()) {
                     return new SmartcardioTerminalProvider();
                 }
-                if(!findAnyProvider){
+                if (!findAnyProvider) {
                     throw new TerminalException("Provider \"SmartcardIO API\" not available");
                 }
             default:
@@ -54,7 +54,7 @@ public class TerminalAPIManager {
         }
     }
 
-    public static boolean checkAvailability(SelectionPolicy choice){
+    public static boolean checkAvailability(SelectionPolicy choice) {
 //        switch(choice){
 //            case SMARTCARD_IO_API:
 //                return SmartcardioTerminalProvider.isSmartcardioAvailable();
@@ -65,7 +65,7 @@ public class TerminalAPIManager {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
-    private TerminalAPIManager(){
+    private TerminalAPIManager() {
         //Do not instantiate
     }
 }

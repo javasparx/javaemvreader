@@ -16,21 +16,23 @@
 package sasc.terminal;
 
 /**
- *
  * @author sasc
  */
 public class NoTerminalsAvailableException extends TerminalException {
-    
-    public NoTerminalsAvailableException(){
+
+    public NoTerminalsAvailableException() {
         super();
     }
-    public NoTerminalsAvailableException(String message){
+
+    public NoTerminalsAvailableException(String message) {
         super(message);
     }
-    public NoTerminalsAvailableException(String message, Throwable cause){
+
+    public NoTerminalsAvailableException(String message, Throwable cause) {
         super(message, cause);
     }
-    public NoTerminalsAvailableException(Throwable cause){
+
+    public NoTerminalsAvailableException(Throwable cause) {
         super(cause);
     }
 }

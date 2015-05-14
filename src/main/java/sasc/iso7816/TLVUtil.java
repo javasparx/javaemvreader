@@ -15,34 +15,28 @@
  */
 package sasc.iso7816;
 
+import sasc.emv.EMVTags;
+import sasc.util.Log;
+import sasc.util.Util;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import sasc.emv.EMVApplication;
-import sasc.emv.EMVTags;
-import static sasc.iso7816.TagValueType.BINARY;
-import static sasc.iso7816.TagValueType.DOL;
-import static sasc.iso7816.TagValueType.MIXED;
-import static sasc.iso7816.TagValueType.NUMERIC;
-import static sasc.iso7816.TagValueType.TEXT;
-import sasc.util.Log;
-import sasc.util.Util;
 
 /**
- *
  * @author sasc
  */
 public class TLVUtil {
-    
+
     private static Tag searchTagById(byte[] tagIdBytes) {
         return EMVTags.getNotNull(tagIdBytes); //TODO take app (IIN or RID) into consideration
     }
-    
-    private static Tag searchTagById(ByteArrayInputStream stream){
+
+    private static Tag searchTagById(ByteArrayInputStream stream) {
         return searchTagById(TLVUtil.readTagIdBytes(stream));
     }
-    
+
     //This is just a list of Tag And Lengths (eg DOLs)
     public static String getFormattedTagAndLength(byte[] data, int indentLength) {
         StringBuilder buf = new StringBuilder();
@@ -81,14 +75,14 @@ public class TLVUtil {
             //Tag field is longer than 1 byte
             do {
                 int nextOctet = stream.read();
-                if(nextOctet < 0){
+                if (nextOctet < 0) {
                     break;
                 }
                 byte tlvIdNextOctet = (byte) nextOctet;
 
                 tagBAOS.write(tlvIdNextOctet);
 
-                if (!Util.isBitSet(tlvIdNextOctet, 8) || (Util.isBitSet(tlvIdNextOctet, 8) && (tlvIdNextOctet & 0x7f) == 0) ) {
+                if (!Util.isBitSet(tlvIdNextOctet, 8) || (Util.isBitSet(tlvIdNextOctet, 8) && (tlvIdNextOctet & 0x7f) == 0)) {
                     break;
                 }
             } while (true);
@@ -101,8 +95,8 @@ public class TLVUtil {
         int length;
         int tmpLength = stream.read();
 
-        if(tmpLength < 0) {
-            throw new TLVException("Negative length: "+tmpLength);
+        if (tmpLength < 0) {
+            throw new TLVException("Negative length: " + tmpLength);
         }
 
         if (tmpLength <= 127) { // 0111 1111
@@ -118,7 +112,7 @@ public class TLVUtil {
             tmpLength = 0;
             for (int i = 0; i < numberOfLengthOctets; i++) {
                 int nextLengthOctet = stream.read();
-                if(nextLengthOctet < 0){
+                if (nextLengthOctet < 0) {
                     throw new TLVException("EOS when reading length bytes");
                 }
                 tmpLength <<= 8;
@@ -128,7 +122,7 @@ public class TLVUtil {
         }
         return length;
     }
-    
+
     public static BERTLV getNextTLV(ByteArrayInputStream stream) {
         if (stream.available() < 2) {
             throw new TLVException("Error parsing data. Available bytes < 2 . Length=" + stream.available());
@@ -169,8 +163,8 @@ public class TLVUtil {
         stream.reset();
         byte[] lengthBytes = new byte[posBefore - posAfter];
 
-        if(lengthBytes.length < 1 || lengthBytes.length > 4){
-            throw new TLVException("Number of length bytes must be from 1 to 4. Found "+lengthBytes.length);
+        if (lengthBytes.length < 1 || lengthBytes.length > 4) {
+            throw new TLVException("Number of length bytes must be from 1 to 4. Found " + lengthBytes.length);
         }
 
         stream.read(lengthBytes, 0, lengthBytes.length);
@@ -207,8 +201,8 @@ public class TLVUtil {
             stream.read(valueBytes, 0, len);
             length = len;
         } else {
-            if(stream.available() < length){
-                throw new TLVException("Length byte(s) indicated "+length+" value bytes, but only "+stream.available()+ " " +(stream.available()>1?"are":"is")+" available");
+            if (stream.available() < length) {
+                throw new TLVException("Length byte(s) indicated " + length + " value bytes, but only " + stream.available() + " " + (stream.available() > 1 ? "are" : "is") + " available");
             }
             // definite form
             valueBytes = new byte[length];
@@ -280,7 +274,7 @@ public class TLVUtil {
     }
 
     public static String prettyPrintAPDUResponse(byte[] data, int startPos, int length) {
-        byte[] tmp = new byte[length-startPos];
+        byte[] tmp = new byte[length - startPos];
         System.arraycopy(data, startPos, tmp, 0, length);
         return prettyPrintAPDUResponse(tmp, 0);
     }

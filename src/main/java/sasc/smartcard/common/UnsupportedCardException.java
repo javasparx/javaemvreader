@@ -18,17 +18,18 @@ package sasc.smartcard.common;
 import sasc.iso7816.SmartCardException;
 
 /**
- *
  * @author sasc
  */
 public class UnsupportedCardException extends SmartCardException {
-    public UnsupportedCardException(String msg){
+    public UnsupportedCardException(String msg) {
         super(msg);
     }
-    public UnsupportedCardException(String msg, Throwable cause){
+
+    public UnsupportedCardException(String msg, Throwable cause) {
         super(msg, cause);
     }
-    public UnsupportedCardException(Throwable cause){
+
+    public UnsupportedCardException(Throwable cause) {
         super(cause);
     }
 }

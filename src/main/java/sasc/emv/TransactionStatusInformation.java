@@ -15,10 +15,11 @@
  */
 package sasc.emv;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import sasc.util.Log;
 import sasc.util.Util;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 /**
  * Transaction Status Information (TSI)
@@ -29,8 +30,8 @@ public class TransactionStatusInformation {
     private byte firstByte;
     private byte secondByte;
 
-    public TransactionStatusInformation(){
-        this((byte)0x00, (byte)0x00);  //Initialize with all bits unset
+    public TransactionStatusInformation() {
+        this((byte) 0x00, (byte) 0x00);  //Initialize with all bits unset
     }
 
     public TransactionStatusInformation(byte firstByte, byte secondByte) {
@@ -88,50 +89,50 @@ public class TransactionStatusInformation {
 
     //The rest of the bits + secondByte are RFU (Reserved for Future Use)
 
-    public String getOfflineDataAuthenticationWasPerformedString(){
-        if(offlineDataAuthenticationWasPerformed()){
+    public String getOfflineDataAuthenticationWasPerformedString() {
+        if (offlineDataAuthenticationWasPerformed()) {
             return "Offline data authentication was performed";
-        }else{
+        } else {
             return "Offline data authentication was not performed";
         }
     }
 
-    public String getCardholderVerificationWasPerformedString(){
-        if(cardholderVerificationWasPerformed()){
+    public String getCardholderVerificationWasPerformedString() {
+        if (cardholderVerificationWasPerformed()) {
             return "Cardholder verification was performed";
-        }else{
+        } else {
             return "Cardholder verification was not performed";
         }
     }
 
-    public String getCardRiskManagementWasPerformedString(){
-        if(cardRiskManagementWasPerformed()){
+    public String getCardRiskManagementWasPerformedString() {
+        if (cardRiskManagementWasPerformed()) {
             return "Card risk management was performed";
-        }else{
+        } else {
             return "Card risk management was not performed";
         }
     }
 
-    public String getIssuerAuthenticationWasPerformedString(){
-        if(issuerAuthenticationWasPerformed()){
+    public String getIssuerAuthenticationWasPerformedString() {
+        if (issuerAuthenticationWasPerformed()) {
             return "Issuer authentication was performed";
-        }else{
+        } else {
             return "Issuer authentication was not performed";
         }
     }
 
-    public String getTerminalRiskManagementWasPerformedString(){
-        if(terminalRiskManagementWasPerformed()){
+    public String getTerminalRiskManagementWasPerformedString() {
+        if (terminalRiskManagementWasPerformed()) {
             return "Terminal risk management was performed";
-        }else{
+        } else {
             return "Terminal risk management was not performed";
         }
     }
 
-    public String getScriptProcessingWasPerformedString(){
-        if(scriptProcessingWasPerformed()){
+    public String getScriptProcessingWasPerformedString() {
+        if (scriptProcessingWasPerformed()) {
             return "Script processing was performed";
-        }else{
+        } else {
             return "Script processing was not performed";
         }
     }
@@ -140,37 +141,37 @@ public class TransactionStatusInformation {
         firstByte = 0x00;
         secondByte = 0x00;
     }
-    
-    public byte[] getBytes(){
+
+    public byte[] getBytes() {
         return new byte[]{firstByte, secondByte};
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         StringWriter sw = new StringWriter();
         dump(new PrintWriter(sw), 0);
         return sw.toString();
     }
 
-    public void dump(PrintWriter pw, int indent){
-        pw.println(Util.getSpaces(indent)+"Transaction Status Information:");
-        String indentStr = Util.getSpaces(indent+Log.INDENT_SIZE);
+    public void dump(PrintWriter pw, int indent) {
+        pw.println(Util.getSpaces(indent) + "Transaction Status Information:");
+        String indentStr = Util.getSpaces(indent + Log.INDENT_SIZE);
 
-        pw.println(indentStr+getOfflineDataAuthenticationWasPerformedString());
-        pw.println(indentStr+getCardholderVerificationWasPerformedString());
-        pw.println(indentStr+getCardRiskManagementWasPerformedString());
-        pw.println(indentStr+getIssuerAuthenticationWasPerformedString());
-        pw.println(indentStr+getTerminalRiskManagementWasPerformedString());
-        pw.println(indentStr+getScriptProcessingWasPerformedString());
+        pw.println(indentStr + getOfflineDataAuthenticationWasPerformedString());
+        pw.println(indentStr + getCardholderVerificationWasPerformedString());
+        pw.println(indentStr + getCardRiskManagementWasPerformedString());
+        pw.println(indentStr + getIssuerAuthenticationWasPerformedString());
+        pw.println(indentStr + getTerminalRiskManagementWasPerformedString());
+        pw.println(indentStr + getScriptProcessingWasPerformedString());
     }
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         TransactionStatusInformation tsi;
-        tsi = new TransactionStatusInformation((byte)0x68, (byte)0x00);
+        tsi = new TransactionStatusInformation((byte) 0x68, (byte) 0x00);
         System.out.println(tsi.toString());
-        tsi = new TransactionStatusInformation((byte)0xE8, (byte)0x00);
+        tsi = new TransactionStatusInformation((byte) 0xE8, (byte) 0x00);
         System.out.println(tsi.toString()); //VISA Comfort Hotel 
-        tsi = new TransactionStatusInformation((byte)0xF8, (byte)0x00);
+        tsi = new TransactionStatusInformation((byte) 0xF8, (byte) 0x00);
         System.out.println(tsi.toString()); //VISA Inside premium hotel (DE)
     }
 

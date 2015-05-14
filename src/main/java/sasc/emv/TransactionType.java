@@ -15,29 +15,29 @@
  */
 package sasc.emv;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import sasc.util.Log;
 import sasc.util.Util;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 /**
- *
  * @author sasc
  */
 public class TransactionType {
-    
+
     private byte value;
-    
-    public TransactionType(byte value){
+
+    public TransactionType(byte value) {
         this.value = value;
     }
-    
-    public byte getByte(){
+
+    public byte getByte() {
         return value;
     }
-    
-    public String getDescription(){
-        switch(value){
+
+    public String getDescription() {
+        switch (value) {
             case 0x00:
                 return "Purchase (of Goods or Services) with a type of Payment Card tender";
             case 0x01:
@@ -59,10 +59,10 @@ public class TransactionType {
             default:
                 return "Unknown";
         }
-        
+
     }
 
-        @Override
+    @Override
     public String toString() {
         StringWriter sw = new StringWriter();
         dump(new PrintWriter(sw), 0);
@@ -77,8 +77,8 @@ public class TransactionType {
 
 
     }
-    
+
     public static void main(String[] args) {
-        System.out.println(new TransactionType((byte)0x01));
+        System.out.println(new TransactionType((byte) 0x01));
     }
 }

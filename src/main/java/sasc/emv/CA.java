@@ -15,31 +15,26 @@
  */
 package sasc.emv;
 
-import sasc.iso7816.SmartCardException;
+import nanoxml.XMLElement;
 import sasc.iso7816.AID;
+import sasc.iso7816.SmartCardException;
+import sasc.util.ByteArrayWrapper;
+import sasc.util.Util;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.Map;
-import nanoxml.XMLElement;
-import sasc.util.ByteArrayWrapper;
-import sasc.util.Util;
+import java.util.*;
 
 /**
  * Certification Authority (CA)
- *
+ * <p/>
  * Trusted third party that establishes a proof that links a public key and
  * other relevant information to its owner.
- *
+ * <p/>
  * EMV Book 2: Every terminal conforming to this specification shall contain the
  * appropriate certification authority’s public key(s) for every application
  * recognized by the terminal. To support SDA, each terminal shall be able to
@@ -57,7 +52,7 @@ import sasc.util.Util;
  * - Retrieval of the Certification Authority Public Key by the terminal
  * - Retrieval of the Issuer Public Key by the terminal
  * - Verification of the Signed Static Application Data by the terminal
- *
+ * <p/>
  * If SDA fails then the terminal shall set the ‘SDA failed’ bit in the Terminal
  * Verification Results (TVR) to 1.
  *
@@ -167,7 +162,7 @@ public class CA {
         try {
             XMLElement certificationAuthoritiesElement = new XMLElement();
             certificationAuthoritiesElement.parseFromReader(new InputStreamReader(Util.loadResource(CA.class, fileName), "UTF-8"));
-            
+
             if (!"CertificationAuthorities".equalsIgnoreCase(certificationAuthoritiesElement.getName())) {
                 throw new RuntimeException("Unexpected Root Element: <" + certificationAuthoritiesElement.getName() + "> . Expected <CertificationAuthorities>");
             }
@@ -179,7 +174,7 @@ public class CA {
                 }
 
                 CA ca = CA.getCA(rid);
-                if(ca == null){
+                if (ca == null) {
                     ca = new CA();
                     ca.setRID(rid);
                     certificationAuthorities.put(ByteArrayWrapper.wrapperAround(ca.getRID()), ca);
@@ -232,7 +227,7 @@ public class CA {
                             try {
                                 expirationDate = DATE_FORMAT.parse(expirationDateStr);
                             } catch (ParseException ex) {
-                                throw new SmartCardException("Expiration date not valid. Must be in the format dd MMM yyyy, (where MMM is the english name of the month), but was: "+expirationDateStr);
+                                throw new SmartCardException("Expiration date not valid. Must be in the format dd MMM yyyy, (where MMM is the english name of the month), but was: " + expirationDateStr);
                             }
                             CAPublicKey pk = new CAPublicKey(index, exp, mod, sha1ChecksumResult, publicKeyAlgorithmIndicator, hashAlgorithmIndicator, description, expirationDate);
                             ca.setPublicKey(index, pk);
@@ -260,32 +255,32 @@ public class CA {
         sb.append(")");
         return sb.toString();
     }
-    
+
     public static String toXml() {
         StringBuilder sb = new StringBuilder();
-        
+
         sb.append("<CertificationAuthorities>\n");
 
-        for(CA ca : CA.getCAs()) {
+        for (CA ca : CA.getCAs()) {
             sb.append("    ").append("<CA RID=\"").append(Util.prettyPrintHexNoWrap(ca.getRID())).append("\">\n");
             sb.append("        ").append("<Name>").append(ca.getName()).append("</Name>\n");
             sb.append("        ").append("<Description>").append(ca.getDescription()).append("</Description>\n");
             sb.append("        ").append("<PublicKeys>\n");
-            
-            for(CAPublicKey caPublicKey : ca.getCAPublicKeys()) {
+
+            for (CAPublicKey caPublicKey : ca.getCAPublicKeys()) {
                 sb.append("            ").append("<PublicKey index=\"").append(caPublicKey.getIndex()).append("\"> <!-- 0x").append(Util.int2Hex(caPublicKey.getIndex())).append(" -->\n");
                 sb.append("                ").append("<Description>").append(caPublicKey.getDescription()).append("</Description>\n");
                 sb.append("                ").append("<ExpirationDate>").append(DATE_FORMAT.format(caPublicKey.getExpirationDate())).append("</ExpirationDate>\n");
                 sb.append("                ").append("<Exponent>").append(Util.prettyPrintHexNoWrap(caPublicKey.getExponent())).append("</Exponent>\n");
                 sb.append("                ").append("<Modulus>\n");
-                sb.append("                    ").append(Util.prettyPrintHex(caPublicKey.getModulus(), 20)).append("\n");   
+                sb.append("                    ").append(Util.prettyPrintHex(caPublicKey.getModulus(), 20)).append("\n");
                 sb.append("                ").append("</Modulus>\n");
                 sb.append("                ").append("<HashAlgorithmIndicator>").append(Util.int2Hex(caPublicKey.getHashAlgorithmIndicator())).append("</HashAlgorithmIndicator>\n");
                 sb.append("                ").append("<Hash>\n");
                 byte[] sha1ChecksumResult = calculateCAPublicKeyCheckSum(ca.getRID(), Util.intToByteArray(caPublicKey.getIndex()), caPublicKey.getModulus(), caPublicKey.getExponent());
-                sb.append("                    ").append(Util.prettyPrintHex(sha1ChecksumResult, 20)).append("\n"); 
+                sb.append("                    ").append(Util.prettyPrintHex(sha1ChecksumResult, 20)).append("\n");
                 sb.append("                ").append("</Hash>\n");
-                sb.append("                ").append("<PublicKeyAlgorithmIndicator>").append(Util.int2Hex(caPublicKey.getPublicKeyAlgorithmIndicator())).append("</PublicKeyAlgorithmIndicator>\n");   
+                sb.append("                ").append("<PublicKeyAlgorithmIndicator>").append(Util.int2Hex(caPublicKey.getPublicKeyAlgorithmIndicator())).append("</PublicKeyAlgorithmIndicator>\n");
                 sb.append("            ").append("</PublicKey>\n");
             }
             sb.append("        ").append("</PublicKeys>\n");

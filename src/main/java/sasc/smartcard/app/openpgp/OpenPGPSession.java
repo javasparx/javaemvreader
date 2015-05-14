@@ -17,9 +17,9 @@ package sasc.smartcard.app.openpgp;
 
 /**
  * TODO
- * 
+ *
  * @author sasc
  */
 public class OpenPGPSession {
-    
+
 }

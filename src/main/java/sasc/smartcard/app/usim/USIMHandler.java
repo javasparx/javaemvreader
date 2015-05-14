@@ -18,8 +18,6 @@ package sasc.smartcard.app.usim;
 import sasc.emv.EMVUtil;
 import sasc.iso7816.AID;
 import sasc.iso7816.Iso7816Commands;
-import sasc.smartcard.app.globalplatform.ISDApplication;
-import sasc.smartcard.app.globalplatform.SecurityDomainFCI;
 import sasc.smartcard.common.ApplicationHandler;
 import sasc.smartcard.common.SmartCard;
 import sasc.terminal.CardConnection;
@@ -29,7 +27,6 @@ import sasc.util.Log;
 import sasc.util.Util;
 
 /**
- *
  * @author sasc
  */
 public class USIMHandler implements ApplicationHandler {
@@ -63,8 +60,8 @@ public class USIMHandler implements ApplicationHandler {
                 Log.debug(Util.getStackTrace(ex));
             }
         }
-        
+
         return false;
     }
-    
+
 }

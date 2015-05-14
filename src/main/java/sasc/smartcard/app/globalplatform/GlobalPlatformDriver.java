@@ -15,22 +15,22 @@
  */
 package sasc.smartcard.app.globalplatform;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import sasc.emv.EMVUtil;
 import sasc.iso7816.AID;
 import sasc.iso7816.Iso7816Commands;
 import sasc.lookup.ATR_DB;
+import sasc.smartcard.common.ApplicationHandler;
+import sasc.smartcard.common.SmartCard;
 import sasc.terminal.CardConnection;
 import sasc.terminal.CardResponse;
 import sasc.terminal.TerminalException;
 import sasc.terminal.TerminalUtil;
 import sasc.util.Log;
 import sasc.util.Util;
-import sasc.smartcard.common.ApplicationHandler;
-import sasc.smartcard.common.SmartCard;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- *
  * @author sasc
  */
 public class GlobalPlatformDriver implements ApplicationHandler {
@@ -58,8 +58,8 @@ public class GlobalPlatformDriver implements ApplicationHandler {
         command = Iso7816Commands.selectByDFName(aid.getAIDBytes(), true, (byte) 0x00);
         response = EMVUtil.sendCmd(terminal, command);
 
-        SW1 = (byte) response.getSW1();
-        SW2 = (byte) response.getSW2();
+        SW1 = response.getSW1();
+        SW2 = response.getSW2();
         data = response.getData();
 
         if (SW1 == (byte) 0x90 && SW2 == (byte) 0x00 && data.length > 0) {
@@ -77,8 +77,8 @@ public class GlobalPlatformDriver implements ApplicationHandler {
 
         response = EMVUtil.sendCmdNoParse(terminal, command); //Not TLV encoded
 
-        SW1 = (byte) response.getSW1();
-        SW2 = (byte) response.getSW2();
+        SW1 = response.getSW1();
+        SW2 = response.getSW2();
 
         if (SW1 == (byte) 0x90 && SW2 == (byte) 0x00) {
             try {
@@ -96,8 +96,8 @@ public class GlobalPlatformDriver implements ApplicationHandler {
         Log.commandHeader("Get Data (Issuer Identification Number)");
         command = Util.fromHexString("00 CA 00 42 00");
         response = EMVUtil.sendCmdNoParse(terminal, command);
-        SW1 = (byte) response.getSW1();
-        SW2 = (byte) response.getSW2();
+        SW1 = response.getSW1();
+        SW2 = response.getSW2();
         data = response.getData();
         if (SW1 == (byte) 0x90 && SW2 == (byte) 0x00) {
             try {
@@ -111,8 +111,8 @@ public class GlobalPlatformDriver implements ApplicationHandler {
         Log.commandHeader("Get Data (Card Image Number)");
         command = Util.fromHexString("00 CA 00 45 00");
         response = EMVUtil.sendCmdNoParse(terminal, command);
-        SW1 = (byte) response.getSW1();
-        SW2 = (byte) response.getSW2();
+        SW1 = response.getSW1();
+        SW2 = response.getSW2();
         data = response.getData();
         if (SW1 == (byte) 0x90 && SW2 == (byte) 0x00) {
             try {
@@ -126,8 +126,8 @@ public class GlobalPlatformDriver implements ApplicationHandler {
         Log.commandHeader("Get Data (Pre-Issuance Data / Serial Number Registers) for Credentsys-J OS");
         command = Util.fromHexString("00 CA 00 46 00");
         response = EMVUtil.sendCmd(terminal, command);
-        SW1 = (byte) response.getSW1();
-        SW2 = (byte) response.getSW2();
+        SW1 = response.getSW1();
+        SW2 = response.getSW2();
         data = response.getData();
         if (SW1 == (byte) 0x90 && SW2 == (byte) 0x00) {
             try {
@@ -142,8 +142,8 @@ public class GlobalPlatformDriver implements ApplicationHandler {
         command = Util.fromHexString("00 CA 00 66 00");
         response = EMVUtil.sendCmd(terminal, command);
 
-        SW1 = (byte) response.getSW1();
-        SW2 = (byte) response.getSW2();
+        SW1 = response.getSW1();
+        SW2 = response.getSW2();
 
         if (SW1 == (byte) 0x90 && SW2 == (byte) 0x00) {
             try {
@@ -157,13 +157,13 @@ public class GlobalPlatformDriver implements ApplicationHandler {
         Log.commandHeader("Get Data (Key Information Template)");
         command = Util.fromHexString("00 CA 00 E0 00");
         response = EMVUtil.sendCmd(terminal, command);
-        SW1 = (byte) response.getSW1();
-        SW2 = (byte) response.getSW2();
+        SW1 = response.getSW1();
+        SW2 = response.getSW2();
         data = response.getData();
         if (SW1 == (byte) 0x90 && SW2 == (byte) 0x00) {
             try {
                 KeyInformationTemplate keyInfo = KeyInformationTemplate.parse(data);
-                    isdApp.setKeyInformationTemplate(keyInfo);
+                isdApp.setKeyInformationTemplate(keyInfo);
             } catch (RuntimeException ex) {
                 Log.debug(Util.getStackTrace(ex));
             }
@@ -172,8 +172,8 @@ public class GlobalPlatformDriver implements ApplicationHandler {
         Log.commandHeader("Get Data (Sequence Counter of the default Key Version Number)");
         command = Util.fromHexString("00 CA 00 C1 00");
         response = EMVUtil.sendCmdNoParse(terminal, command);
-        SW1 = (byte) response.getSW1();
-        SW2 = (byte) response.getSW2();
+        SW1 = response.getSW1();
+        SW2 = response.getSW2();
         data = response.getData();
         if (SW1 == (byte) 0x90 && SW2 == (byte) 0x00) {
             try {
@@ -186,8 +186,8 @@ public class GlobalPlatformDriver implements ApplicationHandler {
         Log.commandHeader("Get Data (Confirmation Counter)");
         command = Util.fromHexString("00 CA 00 C2 00");
         response = EMVUtil.sendCmdNoParse(terminal, command);
-        SW1 = (byte) response.getSW1();
-        SW2 = (byte) response.getSW2();
+        SW1 = response.getSW1();
+        SW2 = response.getSW2();
         data = response.getData();
         if (SW1 == (byte) 0x90 && SW2 == (byte) 0x00) {
             try {

@@ -16,7 +16,6 @@
 package sasc.smartcard.app.ms;
 
 /**
- *
  * @author sasc
  */
 public class MSPlugAndPlay {

@@ -15,31 +15,20 @@
  */
 package sasc.emv;
 
-import sasc.iso7816.ShortFileIdentifier;
-import sasc.smartcard.common.SmartCard;
-import sasc.iso7816.TagValueType;
-import sasc.iso7816.TagAndLength;
-import sasc.iso7816.Tag;
-import sasc.util.Log;
-import sasc.iso7816.SmartCardException;
-import sasc.iso7816.BERTLV;
-import sasc.iso7816.AID;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
-import java.util.List;
 import sasc.emv.system.visa.VISATags;
-import sasc.iso7816.ATR;
-import sasc.iso7816.TLVException;
-import sasc.iso7816.TLVUtil;
+import sasc.iso7816.*;
+import sasc.smartcard.common.SmartCard;
+import sasc.terminal.CardConnection;
 import sasc.terminal.CardResponse;
 import sasc.terminal.TerminalException;
-import sasc.terminal.CardConnection;
-import static sasc.util.Log.COMMAND_HEADER_FRAMING;
+import sasc.util.Log;
 import sasc.util.Util;
 
+import java.io.ByteArrayInputStream;
+
+import static sasc.util.Log.COMMAND_HEADER_FRAMING;
+
 /**
- *
  * @author sasc
  */
 public class EMVUtil {
@@ -60,6 +49,7 @@ public class EMVUtil {
     public static CardResponse sendCmd(CardConnection terminal, byte[] cmd) throws TerminalException {
         return sendCmdInternal(terminal, cmd, true);
     }
+
     public static CardResponse sendCmdNoParse(CardConnection terminal, String cmd) throws TerminalException {
         return sendCmdInternal(terminal, Util.fromHexString(cmd), false);
     }
@@ -82,11 +72,11 @@ public class EMVUtil {
         byte sw2 = (byte) response.getSW2();
         byte[] data = response.getData(); //Copy
         Log.debug("Received data+SW1+SW2: " + Util.byteArrayToHexString(data) + " " + Util.byte2Hex(sw1) + " " + Util.byte2Hex((byte) sw2));
-        Log.debug("data.length: 0x"+Util.int2Hex(data.length) + " ("+data.length+")");
+        Log.debug("data.length: 0x" + Util.int2Hex(data.length) + " (" + data.length + ")");
         if (sw1 == (byte) 0x6c) { //"Wrong length" (resend last command with correct length)
             //Re-issue command with correct length
             cmdBytes[4] = sw2;
-            Log.procedureByte("Received procedure byte SW1=0x6c. Re-issuing command with correct length (" + Util.byte2Hex(sw2)+"): "+ Util.byteArrayToHexString(cmdBytes));
+            Log.procedureByte("Received procedure byte SW1=0x6c. Re-issuing command with correct length (" + Util.byte2Hex(sw2) + "): " + Util.byteArrayToHexString(cmdBytes));
             response = terminal.transmit(cmdBytes);
             sw1 = (byte) response.getSW1();
             sw2 = (byte) response.getSW2();
@@ -97,10 +87,10 @@ public class EMVUtil {
         //Note some non-EMV cards (and terminal software) seem to re-issue the last command with length=SW2 when getting SW1=61
         while (sw1 == (byte) 0x61) { //Procedure byte: send GET RESPONSE to receive more data
             boolean emvMode = true;
-            if(emvMode){
+            if (emvMode) {
                 //this command is EMV specific, since EMV locks CLA to 0x00 only (Book 1, 9.3.1.3). ISO7816-4 specifies CLS in GET RESPONSE in "section 5.4.1 Class byte" to be 0x0X
                 cmdBytes = new byte[]{(byte) 0x00, (byte) 0xC0, (byte) 0x00, (byte) 0x00, (byte) sw2};
-            }else{
+            } else {
                 cmdBytes = new byte[]{cmdBytes[0], (byte) 0xC0, (byte) 0x00, (byte) 0x00, (byte) sw2};
             }
             Log.procedureByte("Received procedure byte SW1=0x61. Sending GET RESPONSE command: " + Util.byteArrayToHexString(cmdBytes));
@@ -128,31 +118,31 @@ public class EMVUtil {
 
     //TODO support extended length
     public static byte[] checkAndAddLeIfMissing(byte[] cmd) {
-        if(cmd == null) {
+        if (cmd == null) {
             throw new IllegalArgumentException("Cmd cannot be null");
         }
-        if(cmd.length < 4) {
-            throw new IllegalArgumentException("Cmd length must be >= 4, but was "+cmd.length);
+        if (cmd.length < 4) {
+            throw new IllegalArgumentException("Cmd length must be >= 4, but was " + cmd.length);
         }
-        if(cmd.length == 4) {
+        if (cmd.length == 4) {
             //Add Le
             byte[] cmdWithLe = new byte[5];
             System.arraycopy(cmd, 0, cmdWithLe, 0, cmd.length);
             cmdWithLe[4] = 0x00;
             return cmdWithLe;
         }
-        if(cmd.length > 5){
+        if (cmd.length > 5) {
             int lc = Util.byteToInt(cmd[4]);
-            if(lc < cmd.length-6 //Lc is less than payload(with Le) length
-                    || lc > cmd.length-5 //Lc is larger than payload(no Le) length
+            if (lc < cmd.length - 6 //Lc is less than payload(with Le) length
+                    || lc > cmd.length - 5 //Lc is larger than payload(no Le) length
                     ) {
-                throw new IllegalArgumentException("Lc was "+lc+", but payload length was "+(cmd.length-5) + " (Le presence unknown)");
+                throw new IllegalArgumentException("Lc was " + lc + ", but payload length was " + (cmd.length - 5) + " (Le presence unknown)");
             }
-            if(lc == cmd.length-5) {
+            if (lc == cmd.length - 5) {
                 //Add Le
-                byte[] cmdWithLe = new byte[cmd.length+1];
+                byte[] cmdWithLe = new byte[cmd.length + 1];
                 System.arraycopy(cmd, 0, cmdWithLe, 0, cmd.length);
-                cmdWithLe[cmdWithLe.length-1] = 0x00;
+                cmdWithLe[cmdWithLe.length - 1] = 0x00;
                 return cmdWithLe;
             }
         }
@@ -161,11 +151,11 @@ public class EMVUtil {
         return cmd;
     }
 
-    public static void printResponse(byte[] dataAndSw, boolean doParseTLVData){
-        byte[] tmp = new byte[dataAndSw.length-2];
+    public static void printResponse(byte[] dataAndSw, boolean doParseTLVData) {
+        byte[] tmp = new byte[dataAndSw.length - 2];
         System.arraycopy(dataAndSw, 0, tmp, 0, tmp.length);
-        byte sw1 = dataAndSw[dataAndSw.length-2];
-        byte sw2 = dataAndSw[dataAndSw.length-1];
+        byte sw1 = dataAndSw[dataAndSw.length - 2];
+        byte sw2 = dataAndSw[dataAndSw.length - 1];
         short sw = Util.byte2Short(sw1, sw2);
         printResponse(tmp, sw1, sw2, sw, doParseTLVData);
     }
@@ -181,9 +171,9 @@ public class EMVUtil {
         Log.info("response SW1SW2 : " + Util.byte2Hex(sw1) + " " + Util.byte2Hex(sw2) + swDescription);
         Log.info("response ascii  : " + Util.getSafePrintChars(data));
         if (doParseTLVData) {
-            try{
+            try {
                 Log.info("response parsed :\n" + TLVUtil.prettyPrintAPDUResponse(data));
-            }catch(TLVException ex){
+            } catch (TLVException ex) {
                 Log.debug(ex.getMessage()); //Util.getStackTrace(ex)
             }
         }
@@ -230,8 +220,8 @@ public class EMVUtil {
                             int index = Util.byteArrayToInt(tlv.getValueBytes());
                             ddf.setIssuerCodeTableIndex(index);
                         } else if (tlv.getTag().equals(EMVTags.APPLICATION_LABEL)) {
-							//TODO is this tag expected at this point? Should be located in APP_TEMPLATE! Are there any info in book 1?
-						    String label = Util.getSafePrintChars(tlv.getValueBytes());
+                            //TODO is this tag expected at this point? Should be located in APP_TEMPLATE! Are there any info in book 1?
+                            String label = Util.getSafePrintChars(tlv.getValueBytes());
                             //ddf.setApplicationLabel(label);
                         } else if (tlv.getTag().equals(EMVTags.FCI_ISSUER_DISCRETIONARY_DATA)) { //PPSE
                             ByteArrayInputStream discrStream = new ByteArrayInputStream(tlv.getValueBytes());
@@ -262,10 +252,10 @@ public class EMVUtil {
                                         }
                                     }
                                     //Verify that the app template is valid
-                                    if(app.getAID() != null){
+                                    if (app.getAID() != null) {
                                         card.addEMVApplication(app);
-                                    }else{
-                                        Log.debug("Found invalid application template: "+app.toString());
+                                    } else {
+                                        Log.debug("Found invalid application template: " + app.toString());
                                     }
                                 } else {
                                     //TODO call ddf instead of card?
@@ -332,10 +322,10 @@ public class EMVUtil {
                         Log.debug("Adding application: " + Util.prettyPrintHexNoWrap(app.getAID().getAIDBytes()));
 //                        apps.add(app);
                         //Verify that the app template is valid
-                        if(app.getAID() != null){
+                        if (app.getAID() != null) {
                             card.addEMVApplication(app);
-                        }else{
-                            Log.debug("Found invalid application template: "+app.toString());
+                        } else {
+                            Log.debug("Found invalid application template: " + app.toString());
                         }
                     } else {
                         card.addUnhandledRecord(tlv);
@@ -351,7 +341,7 @@ public class EMVUtil {
 
     public static void parseFCIADF(byte[] data, EMVApplication app) {
 
-        if(data == null || data.length < 2){
+        if (data == null || data.length < 2) {
             return;
         }
 
@@ -365,7 +355,7 @@ public class EMVUtil {
                 tlv = TLVUtil.getNextTLV(templateStream);
                 if (tlv.getTag().equals(EMVTags.DEDICATED_FILE_NAME)) {
                     app.setAID(new AID(tlv.getValueBytes()));
-                    Log.debug("ADDED AID to app. AID after set: "+Util.prettyPrintHexNoWrap(app.getAID().getAIDBytes()) + " - AID in FCI: " + Util.prettyPrintHexNoWrap(tlv.getValueBytes()));
+                    Log.debug("ADDED AID to app. AID after set: " + Util.prettyPrintHexNoWrap(app.getAID().getAIDBytes()) + " - AID in FCI: " + Util.prettyPrintHexNoWrap(tlv.getValueBytes()));
                 } else if (tlv.getTag().equals(EMVTags.FCI_PROPRIETARY_TEMPLATE)) { //Proprietary Information Template
                     ByteArrayInputStream bis2 = tlv.getValueStream();
                     int totalLen = bis2.available();
@@ -398,8 +388,8 @@ public class EMVUtil {
                                 tlv = TLVUtil.getNextTLV(bis3);
                                 if (tlv.getTag().equals(EMVTags.LOG_ENTRY)) {
                                     app.setLogEntry(new LogEntry(tlv.getValueBytes()[0], tlv.getValueBytes()[1]));
-							    } else if (tlv.getTag().equals(VISATags.VISA_LOG_ENTRY)) { //TODO add this to VISAApp
-							    	//app.setVisaLogEntry(new LogEntry(tlv.getValueBytes()[0], tlv.getValueBytes()[1]));
+                                } else if (tlv.getTag().equals(VISATags.VISA_LOG_ENTRY)) { //TODO add this to VISAApp
+                                    //app.setVisaLogEntry(new LogEntry(tlv.getValueBytes()[0], tlv.getValueBytes()[1]));
                                 } else if (tlv.getTag().equals(EMVTags.ISSUER_URL)) {
                                     app.setIssuerUrl(Util.getSafePrintChars(tlv.getValueBytes()));
                                 } else if (tlv.getTag().equals(EMVTags.ISSUER_IDENTIFICATION_NUMBER)) {
@@ -427,7 +417,7 @@ public class EMVUtil {
 
     private static void checkForProprietaryTagOrAddToUnhandled(EMVApplication app, BERTLV tlv) {
         Tag tagFound = EMVTags.get(app, tlv.getTag());
-        if(tagFound != null) {
+        if (tagFound != null) {
             app.addUnprocessedRecord(tlv);
         } else {
             app.addUnknownRecord(tlv);
@@ -707,9 +697,9 @@ public class EMVUtil {
                 EMVTerminal.getTerminalVerificationResults().setDDAFailed(true);
             }
         } else if (tlv.getTag().equals(EMVTags.RESPONSE_MESSAGE_TEMPLATE_2)) {
-			if (!app.getIssuerPublicKeyCertificate().validate() || !app.getICCPublicKeyCertificate().validate()) {
-			    EMVTerminal.getTerminalVerificationResults().setDDAFailed(true);
-			    return;
+            if (!app.getIssuerPublicKeyCertificate().validate() || !app.getICCPublicKeyCertificate().validate()) {
+                EMVTerminal.getTerminalVerificationResults().setDDAFailed(true);
+                return;
             }
             //AIP & AFL WITH delimiters (that is, including, including tag and length) and possibly other BER TLV tags (that might be proprietary)
             while (valueBytesBis.available() >= 2) {
@@ -735,29 +725,29 @@ public class EMVUtil {
 
     public static void main(String[] args) {
 
-        System.out.println(TLVUtil.readTagLength(new ByteArrayInputStream(new byte[]{(byte)0x81, (byte)0x97})));
+        System.out.println(TLVUtil.readTagLength(new ByteArrayInputStream(new byte[]{(byte) 0x81, (byte) 0x97})));
 
-//        EMVApplication app = new EMVApplication();
-//        parseFCIADF(Util.fromHexString("6f198407a0000000038002a50e5009564953412041757468870101"), app);
-//
-//        String gpoResponse = "77 0e 82 02 38 00 94 08 08 01 03 01 10 01 01 00";
-//
-//        parseProcessingOpts(Util.fromHexString(gpoResponse), app);
-//
-//        System.out.println(app.getApplicationFileLocator().toString());
-//        System.out.println(app.getApplicationInterchangeProfile().toString());
+        EMVApplication app = new EMVApplication();
+        parseFCIADF(Util.fromHexString("6f198407a0000000038002a50e5009564953412041757468870101"), app);
 
+        String gpoResponse = "77 0e 82 02 38 00 94 08 08 01 03 01 10 01 01 00";
+
+        parseProcessingOpts(Util.fromHexString(gpoResponse), app);
+
+        System.out.println(app.getApplicationFileLocator().toString());
+        System.out.println(app.getApplicationInterchangeProfile().toString());
+//
 //        System.out.println(EMVUtil.prettyPrintAPDUResponse(Util.fromHexString("6f 20 81 02 00 00 82 01 38 83 02 3f 00 84 06 00 00 00 00 00 00 85 01 00 8c 08 1f a1 a1 a1 a1 a1 88 a1")));
-
+//
 //        System.out.println(EMVUtil.prettyPrintAPDUResponse(Util.fromHexString("6F388407 A0000000 031010A5 2D500B56 69736144 616E6B6F 72748701 015F2D08 6461656E 6E6F7376 9F110101 9F120B56 69736144 616E6B6F 7274")));
 
 
     }
 
-    private static void printCmdHdr(String hex){
+    private static void printCmdHdr(String hex) {
 
-            Log.info("\n"+COMMAND_HEADER_FRAMING
+        Log.info("\n" + COMMAND_HEADER_FRAMING
                 + "\n[CMD] " + hex
-                + "\n"+COMMAND_HEADER_FRAMING);
+                + "\n" + COMMAND_HEADER_FRAMING);
     }
 }

@@ -15,29 +15,30 @@
  */
 package sasc.smartcard.app.ndef;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import sasc.iso7816.AID;
 import sasc.iso7816.Application;
 import sasc.smartcard.common.SmartCard;
 import sasc.util.Log;
 import sasc.util.Util;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 /**
  * TODO
- * 
+ *
  * @author sasc
  */
 public class NDEFApplication implements Application {
-    
+
     private AID aid;
     private SmartCard card;
-    
+
     public NDEFApplication(AID aid, SmartCard card) {
         this.aid = aid;
         this.card = card;
     }
-    
+
     @Override
     public AID getAID() {
         return aid;
@@ -47,7 +48,7 @@ public class NDEFApplication implements Application {
     public SmartCard getCard() {
         return card;
     }
-    
+
     @Override
     public String toString() {
         StringWriter sw = new StringWriter();
@@ -60,7 +61,7 @@ public class NDEFApplication implements Application {
         pw.println(Util.getSpaces(indent) + "NDEF Application");
 
         String indentStr = Util.getSpaces(indent + Log.INDENT_SIZE);
-        
+
         if (aid != null) {
             aid.dump(pw, indent + Log.INDENT_SIZE);
         }

@@ -15,19 +15,20 @@
  */
 package sasc.emv;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import sasc.iso7816.SmartCardException;
 import sasc.util.Util;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 /**
  * International Bank Account Number (IBAN).
- *
+ * <p/>
  * Uniquely identifies the account of a customer at a financial institution as
  * defined in ISO 13616
- *
+ * <p/>
  * Length 0-34 bytes
- *
+ * <p/>
  * IBAN - International Bank Account Number. Often (incorrectly) referred to as
  * IBAN Number. An unique account identifier for every bank account in Europe,
  * supervised by SWIFT. The IBAN system was originally intended for use within
@@ -52,7 +53,7 @@ public class IBAN {
     public String countryCode;
 
     public IBAN(byte[] iban) {
-        if(iban.length > 34) {
+        if (iban.length > 34) {
             throw new SmartCardException("Invalid IBAN length: " + iban.length);
         }
         this.iban = Util.getSafePrintChars(iban);

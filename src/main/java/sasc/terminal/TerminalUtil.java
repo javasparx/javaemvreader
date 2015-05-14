@@ -21,14 +21,13 @@ import sasc.util.Log;
 import sasc.util.Util;
 
 /**
- *
  * @author sasc
  */
 public class TerminalUtil {
 
-	public enum State{
-		CARD_PRESENT, CARD_INSERTED
-	}
+    public enum State {
+        CARD_PRESENT, CARD_INSERTED
+    }
 
     public static CardConnection connect(State state) throws TerminalException {
         CardConnection cardConnection = null;
@@ -53,14 +52,14 @@ public class TerminalUtil {
             }
             Log.info("Please insert a Smart Card into any attached reader.");
             try {
-				switch(state){
-					case CARD_INSERTED:
-                		cardConnection = terminalProvider.connectAnyTerminal(); //Waits for card inserted
-                		break;
+                switch (state) {
+                    case CARD_INSERTED:
+                        cardConnection = terminalProvider.connectAnyTerminal(); //Waits for card inserted
+                        break;
                     case CARD_PRESENT:
                         cardConnection = terminalProvider.connectAnyTerminalWithCardPresent("*");
                         break;
-				}
+                }
 
                 break; // Outer while
             } catch (NoTerminalsAvailableException ntex) {
@@ -69,7 +68,7 @@ public class TerminalUtil {
                 //go back and try again
             }
         }
-        if(cardConnection == null) { //eg InterruptedException
+        if (cardConnection == null) { //eg InterruptedException
             return null;
         }
         Log.info("OK, card found");

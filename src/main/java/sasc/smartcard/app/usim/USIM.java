@@ -15,29 +15,30 @@
  */
 package sasc.smartcard.app.usim;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import sasc.iso7816.AID;
 import sasc.iso7816.Application;
 import sasc.smartcard.common.SmartCard;
 import sasc.util.Log;
 import sasc.util.Util;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 /**
  * (U)SIM/UICC
- * 
+ *
  * @author sasc
  */
 public class USIM implements Application {
 
     private AID aid;
     private SmartCard card;
-    
+
     public USIM(AID aid, SmartCard card) {
         this.aid = aid;
         this.card = card;
     }
-    
+
     @Override
     public AID getAID() {
         return aid;
@@ -60,13 +61,13 @@ public class USIM implements Application {
         pw.println(Util.getSpaces(indent) + "(U)SIM Application");
 
         String indentStr = Util.getSpaces(indent + Log.INDENT_SIZE);
-        
+
         if (aid != null) {
             aid.dump(pw, indent + Log.INDENT_SIZE);
         }
-        
-        pw.println(indentStr+"");
-        
+
+        pw.println(indentStr + "");
+
     }
 
 }
@@ -79,7 +80,7 @@ public class USIM implements Application {
 // check SIM_DF
 // find 3G USIM app
 // -> if not found, try 3G RID (from EF_DIR?)
-    
+
 // Verify whether CHV1 (PIN1) is needed to access the card
 // 0x9804 = Security status not satisfied?
 
@@ -88,7 +89,7 @@ public class USIM implements Application {
 // http://osxr.org/android/source/external/wpa_supplicant_6/wpa_supplicant/src/utils/pcsc_funcs.h
 // http://osxr.org/android/source/external/wpa_supplicant_6/wpa_supplicant/src/utils/pcsc_funcs.c
 // https://android.googlesource.com/platform/frameworks/opt/telephony/+/jb-mr1-dev/src/java/com/android/internal/telephony/IccConstants.java
-    
+
 // Select Cyclic File (6E00) 00 A4 00 00 02 6E 00    
 // DF Telecom (7F10) 00 A4 00 00 02 7F 10
 // SCARD_FILE_GSM_DF 0x7F20
@@ -102,7 +103,7 @@ public class USIM implements Application {
 // SCARD_FILE_EF_CK 0x6FE1
 // SCARD_FILE_EF_IK 0x6FE2
 // SCARD_CURRENT_ADF 0x7FFF <- current selected (u)sim
-    
+
 // USIM_CMD_RUN_UMTS_ALG 0x00, 0x88, 0x00, 0x81, 0x22
 // USIM_CMD_STATUS       0x80, 0xF2, 0x00, 0x00, 0x00
 // unsigned char cmd[50] = { USIM_CMD_STATUS };

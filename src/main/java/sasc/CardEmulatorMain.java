@@ -15,23 +15,23 @@
  */
 package sasc;
 
-import sasc.smartcard.common.SessionProcessingEnv;
-import sasc.smartcard.common.Context;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import sasc.smartcard.common.CardSession;
-import sasc.iso7816.AID;
-import sasc.emv.EMVApplication;
 import sasc.emv.CA;
-import sasc.smartcard.common.SmartCard;
-import sasc.emv.*;
+import sasc.emv.EMVApplication;
+import sasc.emv.EMVSession;
+import sasc.iso7816.AID;
 import sasc.iso7816.SmartCardException;
-import sasc.util.Log;
+import sasc.smartcard.common.CardSession;
+import sasc.smartcard.common.Context;
+import sasc.smartcard.common.SessionProcessingEnv;
+import sasc.smartcard.common.SmartCard;
 import sasc.terminal.CardConnection;
 import sasc.terminal.TerminalException;
+import sasc.util.Log;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 /**
- *
  * @author sasc
  */
 public class CardEmulatorMain {
@@ -57,9 +57,9 @@ public class CardEmulatorMain {
                     //Skip if GPO failed
                     continue;
                 }
-                
+
                 session.prepareTransactionProcessing();
-                
+
                 session.performTransaction();
 
             }

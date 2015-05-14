@@ -16,21 +16,22 @@
 package sasc.emv;
 
 import sasc.iso7816.SmartCardException;
+import sasc.util.Log;
+import sasc.util.Util;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Calendar;
 import java.util.Date;
-import sasc.util.Log;
-import sasc.util.Util;
 
 /**
  * Track 2 Equivalent Data
  * A representation of the data that can be found on Track 2 on magnetic stripe cards
  * Contains the data elements of track 2 according to ISO/IEC 7813,
  * excluding start sentinel, end sentinel, and Longitudinal Redundancy Check (LRC)
- * 
+ * <p/>
  * http://en.wikipedia.org/wiki/Magnetic_stripe_card
- * 
+ *
  * @author sasc
  */
 public class Track2EquivalentData {
@@ -72,7 +73,7 @@ public class Track2EquivalentData {
     public ServiceCode getServiceCode() {
         return serviceCode;
     }
-    
+
     public PAN getPAN() {
         return pan;
     }
@@ -89,8 +90,8 @@ public class Track2EquivalentData {
         String indentStr = Util.getSpaces(indent + Log.INDENT_SIZE);
         pan.dump(pw, indent + Log.INDENT_SIZE);
         pw.println(indentStr + "Expiration Date: " + expirationDate);
-        serviceCode.dump(pw, indent+Log.INDENT_SIZE);
-        pw.println(indentStr + "Discretionary Data: " + discretionaryData +" (may include Pin Verification Key Indicator (PVKI, 1 character), PIN Verification Value (PVV, 4 characters), Card Verification Value or Card Verification Code (CVV or CVC, 3 characters))");
+        serviceCode.dump(pw, indent + Log.INDENT_SIZE);
+        pw.println(indentStr + "Discretionary Data: " + discretionaryData + " (may include Pin Verification Key Indicator (PVKI, 1 character), PIN Verification Value (PVV, 4 characters), Card Verification Value or Card Verification Code (CVV or CVC, 3 characters))");
     }
 
     public static void main(String[] args) {

@@ -15,17 +15,17 @@
  */
 package sasc.emv;
 
+import sasc.util.Log;
+import sasc.util.Util;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import sasc.util.Log;
-import sasc.util.Util;
 
 /**
- *
  * @author sasc
  */
 public class SignedDynamicApplicationData {
@@ -77,7 +77,7 @@ public class SignedDynamicApplicationData {
 
         //Now read padding bytes (0xbb), if available
         //The padding bytes are used in hash validation
-        byte[] padding = new byte[stream.available()-21];
+        byte[] padding = new byte[stream.available() - 21];
         stream.read(padding, 0, padding.length);
 
         hashResult = new byte[20];
@@ -91,7 +91,7 @@ public class SignedDynamicApplicationData {
         //Header not included in hash
         hashStream.write(signedDataFormat);
         hashStream.write(hashAlgorithmIndicator);
-        hashStream.write((byte)iccDynamicDataLenght);
+        hashStream.write((byte) iccDynamicDataLenght);
         hashStream.write(iccDynamicNumber, 0, iccDynamicNumber.length);
         hashStream.write(padding, 0, padding.length);
         hashStream.write(terminalDynamicData, 0, terminalDynamicData.length);
@@ -103,7 +103,7 @@ public class SignedDynamicApplicationData {
         } catch (NoSuchAlgorithmException ex) {
             throw new SignedDataException("SHA-1 hash algorithm not available", ex);
         }
-        if(!Arrays.equals(sha1Result, hashResult)){
+        if (!Arrays.equals(sha1Result, hashResult)) {
             throw new SignedDataException("Hash is not valid");
         }
 
@@ -125,9 +125,9 @@ public class SignedDynamicApplicationData {
 
         byte[] expBytesICC = iccPublicKey.getExponent();
         byte[] modBytesICC = iccPublicKey.getModulus();
-        
+
         if (data.length != modBytesICC.length) {
-            throw new SignedDataException("Data length does not equal key length. Data length=" + data.length + " Key length="+modBytesICC.length);
+            throw new SignedDataException("Data length does not equal key length. Data length=" + data.length + " Key length=" + modBytesICC.length);
         }
 
         byte[] decipheredBytes = Util.performRSA(data, expBytesICC, modBytesICC);
@@ -146,12 +146,12 @@ public class SignedDynamicApplicationData {
         pw.println(Util.getSpaces(indent) + "Signed Dynamic Application Data");
         String indentStr = Util.getSpaces(indent + Log.INDENT_SIZE);
 
-        if(!validationPerformed){
+        if (!validationPerformed) {
             validate();
         }
 
         if (isValid()) {
-            pw.println(indentStr + "Hash Algorithm Indicator: " + hashAlgorithmIndicator +" (=SHA-1)");
+            pw.println(indentStr + "Hash Algorithm Indicator: " + hashAlgorithmIndicator + " (=SHA-1)");
             pw.println(indentStr + "ICC Dynamic Data: " + Util.byteArrayToHexString(iccDynamicNumber));
             pw.println(indentStr + "Hash: " + Util.byteArrayToHexString(hashResult));
 

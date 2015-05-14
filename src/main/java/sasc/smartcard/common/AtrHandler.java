@@ -15,15 +15,16 @@
  */
 package sasc.smartcard.common;
 
-import java.util.List;
 import sasc.terminal.CardConnection;
 import sasc.terminal.TerminalException;
 
+import java.util.List;
+
 /**
- *
  * @author sasc
  */
 public interface AtrHandler {
     public boolean process(SmartCard card, CardConnection cardConnection) throws TerminalException;
+
     public List<String> getAtrPatterns();
 }

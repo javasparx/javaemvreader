@@ -15,12 +15,10 @@
  */
 package sasc.smartcard.app.yubikey;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import sasc.emv.EMVUtil;
 import sasc.emv.SW;
 import sasc.iso7816.AID;
 import sasc.iso7816.Iso7816Commands;
-import sasc.iso7816.MasterFile;
 import sasc.iso7816.SmartCardException;
 import sasc.smartcard.common.ApplicationHandler;
 import sasc.smartcard.common.SmartCard;
@@ -30,6 +28,8 @@ import sasc.terminal.TerminalException;
 import sasc.util.Log;
 import sasc.util.Util;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * (From http://www.yubico.com/2012/12/yubikey-neo-composite-device/)
  * Here are the common modes:
@@ -37,11 +37,11 @@ import sasc.util.Util;
  * -m1 CCID (OpenPGP only , no OTP) ( warning : you cannot use ykpersonalize after this setting!)
  * -m2 HID & CCID Only (OTP & OpenPGP)
  * -m82 HID & CCID (OTP and OpenPGP) EJECT Flag set - allows SmartCard and OTP concurrently.
- *
+ * <p/>
  * The EJECT_FLAG (0x80) operates as follows:
  * -with mode 1 with the EJECT_FLAG set, when touching the button the NEO will "eject" the smart card, making it unavailable to the host, when touching again it will be "inserted" again.
  * -with mode 2 with the EJECT_FLAG set, when touching the button the NEO will "eject" the smart card, send the OTP from the HID interface and then "insert" the smart-card.
- *
+ * <p/>
  * The NEO can be configured to have card presence states, emulating having a smartcard reader where a smartcard is inserted and removed. The configurations are:
  * -Always present The NEO reports that a card is permanently present. Touching the Yubikey button will cause the LED to toggle and the state of this flip-flop can be read through the secure element.
  * -Insert- and removal enabled After insertion of the NEO, it reports that a smartcard reader is present, but no smartcard is inserted. By touching the Yubikey button, the NEO reports that a smartcard has been inserted. Touching the button again causes the NEO to report that the card has been removed.
@@ -51,30 +51,30 @@ import sasc.util.Util;
  */
 public class Yubikey implements ApplicationHandler {
 
-    private static final byte MODE_OTP              = 0x00;    // OTP only
-    private static final byte MODE_CCID             = 0x01;    // CCID only, no eject
-    private static final byte MODE_OTP_CCID         = 0x02;    // OTP + CCID composite
+    private static final byte MODE_OTP = 0x00;    // OTP only
+    private static final byte MODE_CCID = 0x01;    // CCID only, no eject
+    private static final byte MODE_OTP_CCID = 0x02;    // OTP + CCID composite
 
-    private static final byte MODE_FLAG_EJECT       = (byte)0x80;    // CCID device supports eject (CCID) / OTP force eject (OTP_CCID)
+    private static final byte MODE_FLAG_EJECT = (byte) 0x80;    // CCID device supports eject (CCID) / OTP force eject (OTP_CCID)
 
-    public  static final byte MODE_MASK             = 0x03;    // Mask for mode bits
+    public static final byte MODE_MASK = 0x03;    // Mask for mode bits
 
-    private static final byte SLOT_DEVICE_CONFIG    = 0x11;    // Write device configuration record
+    private static final byte SLOT_DEVICE_CONFIG = 0x11;    // Write device configuration record
 
-    private static final byte DEFAULT_CHAL_TIMEOUT  = 15;      // Default challenge timeout in seconds
+    private static final byte DEFAULT_CHAL_TIMEOUT = 15;      // Default challenge timeout in seconds
 
-    private static final byte INS_YK2_REQ           = 0x01;    // General request (cmd in P1). YubiKey API request (as used by the yubico personalization tools)
-    private static final byte INS_YK2_OTP           = 0x02;    // Generate OTP (slot in P1) (zero indexed)
-    private static final byte INS_YK2_STATUS        = 0x03;    // Read out status record
-    private static final byte INS_YK2_NDEF          = 0x04;    // Read out NDEF record (only used by the NDEF applet)
-    private static final byte NEO_CONFIG_1          = 0x00;    // Configuration 1
-    private static final byte NEO_CONFIG_2          = 0x01;    // Configuration 2
-    private static final byte FORMAT_ASCII          = 0x00;    // Output format is ascii
-    private static final byte FORMAT_ASCII_NO_FMT   = 0x01;    // Ascii, no formatting characters
-    private static final byte FORMAT_SCANCODE       = 0x02;    // Output format is scan codes
-    private static final short SW_BUTTON_REQD       = 0x6985;  // ISO7816 Access condition not met
+    private static final byte INS_YK2_REQ = 0x01;    // General request (cmd in P1). YubiKey API request (as used by the yubico personalization tools)
+    private static final byte INS_YK2_OTP = 0x02;    // Generate OTP (slot in P1) (zero indexed)
+    private static final byte INS_YK2_STATUS = 0x03;    // Read out status record
+    private static final byte INS_YK2_NDEF = 0x04;    // Read out NDEF record (only used by the NDEF applet)
+    private static final byte NEO_CONFIG_1 = 0x00;    // Configuration 1
+    private static final byte NEO_CONFIG_2 = 0x01;    // Configuration 2
+    private static final byte FORMAT_ASCII = 0x00;    // Output format is ascii
+    private static final byte FORMAT_ASCII_NO_FMT = 0x01;    // Ascii, no formatting characters
+    private static final byte FORMAT_SCANCODE = 0x02;    // Output format is scan codes
+    private static final short SW_BUTTON_REQD = 0x6985;  // ISO7816 Access condition not met
 
-    private static final byte SLOT_CHAL_HMAC1       = 0x30;    // cmd 00 01 30 00 09 + 8 bytes challenge (-> response + SW1SW2)
+    private static final byte SLOT_CHAL_HMAC1 = 0x30;    // cmd 00 01 30 00 09 + 8 bytes challenge (-> response + SW1SW2)
 
 //    printf("\nVersion:       %d.%d.%d\n", rAPDU.select.status.versionMajor,
 //            rAPDU.select.status.versionMinor, rAPDU.select.status.versionBuild);
@@ -104,7 +104,7 @@ public class Yubikey implements ApplicationHandler {
         byte[] command;
         Log.commandHeader("Select Yubikey NEO application interface");
 
-        command = Iso7816Commands.selectByDFName(aid.getAIDBytes(), true, (byte)0x00);
+        command = Iso7816Commands.selectByDFName(aid.getAIDBytes(), true, (byte) 0x00);
 
         CardResponse selectAppResp = EMVUtil.sendCmdNoParse(terminal, command);
 
@@ -164,49 +164,50 @@ public class Yubikey implements ApplicationHandler {
 
             card.addApplication(app);
             initialized.set(true);
-        } else if(selectAppResp.getSW() == SW.APPLET_SELECTION_FAILED.getSW()) {
+        } else if (selectAppResp.getSW() == SW.APPLET_SELECTION_FAILED.getSW()) {
             Log.info("The NEO needs to be 'activated' by pressing the button (possibly twice)");
         }
         return false;
     }
-    
+
     /**
      * May only be set using the contacted interface
+     *
      * @param mode
-     * @throws TerminalException 
+     * @throws TerminalException
      */
     public void setMode(byte mode) throws TerminalException {
 
-        if(!initialized.get()){
+        if (!initialized.get()) {
             throw new SmartCardException("Yubikey NEO application not initialized");
         }
 
         int SW1;
         int SW2;
         String commandStr;
-        
-        byte ejectFlag = (byte)(mode & 0xF0);
-        byte modeFlag = (byte)(mode & 0x0F);
+
+        byte ejectFlag = (byte) (mode & 0xF0);
+        byte modeFlag = (byte) (mode & 0x0F);
 
         // Transmit set config command
 
         Log.commandHeader("Send command Yubikey NEO write config");
 
         commandStr = "00"
-                +Util.byte2Hex(INS_YK2_REQ)
-                +Util.byte2Hex(SLOT_DEVICE_CONFIG)
+                + Util.byte2Hex(INS_YK2_REQ)
+                + Util.byte2Hex(SLOT_DEVICE_CONFIG)
                 + "00"
                 + "04"
                 //struct DEVICE_CONFIG
-                +Util.byte2Hex(mode)//+"82" //Util.byte2Hex(MODE_OTP_CCID | MODE_FLAG_EJECT)
-                +Util.byte2Hex(DEFAULT_CHAL_TIMEOUT)
-                +"00 00"; // Auto eject time in seconds
+                + Util.byte2Hex(mode)//+"82" //Util.byte2Hex(MODE_OTP_CCID | MODE_FLAG_EJECT)
+                + Util.byte2Hex(DEFAULT_CHAL_TIMEOUT)
+                + "00 00"; // Auto eject time in seconds
 
         CardResponse setConfigResp = EMVUtil.sendCmdNoParse(terminal, Util.fromHexString(commandStr));
 
         int newProgSeq = Util.byteToInt(setConfigResp.getData()[3]);
 
-        Log.info("Update "+(newProgSeq == (app.getProgrammingSeqNum() + 1)?"successful":"failed"));
+        Log.info("Update " + (newProgSeq == (app.getProgrammingSeqNum() + 1) ? "successful" : "failed"));
 
 //            apdu.apdu2.cla = 0;
 //            apdu.apdu2.ins = INS_YK2_REQ;
@@ -215,7 +216,7 @@ public class Yubikey implements ApplicationHandler {
 //            apdu.apdu2.lc = sizeof(DEVICE_CONFIG);
 //            apdu.apdu2.config.mode = MODE_OTP; // | MODE_FLAG_EJECT;
 //            apdu.apdu2.config.crTimeout = DEFAULT_CHAL_TIMEOUT;
-        
+
 //            apdu.apdu2.config.autoEjectTime = 0;
 //            dwRecvLength = sizeof(rAPDU);
 //            rc = SCardTransmit(hCard, SCARD_PCI_T1, (BYTE *) &apdu, 5 + apdu.apdu2.lc,	NULL, rAPDU.buf, &dwRecvLength);
@@ -230,12 +231,12 @@ public class Yubikey implements ApplicationHandler {
 //            }
 
     }
-    
+
     public YubikeyNeoApplication getApplication() {
         return app;
     }
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         byte[] data = Util.fromHexString("03 00 02 01 05 07 81 00 00 00");
 
         System.out.println(Util.byteArrayToInt(data, 4, 2));

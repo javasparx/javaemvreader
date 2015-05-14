@@ -15,19 +15,20 @@
  */
 package sasc.emv;
 
+import sasc.iso7816.TLVUtil;
 import sasc.iso7816.TagAndLength;
+import sasc.util.Log;
+import sasc.util.Util;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import sasc.iso7816.TLVUtil;
-import sasc.util.Log;
-import sasc.util.Util;
 
 /**
  * Data Object List (DOL)
- *
+ * <p/>
  * In several instances, the terminal is asked to build a flexible list of data
  * elements to be passed to the card under the card‘s direction.
  * To minimise processing within the ICC, such a list is not TLV encoded but
@@ -37,25 +38,25 @@ import sasc.util.Util;
  * when the data is received. This is achieved by including a
  * Data Object List (DOL) in the ICC, specifying the format of the data to
  * be included in the constructed field.
- *
+ * <p/>
  * DOLs currently used in this specification include:
  * - the Processing Options Data Object List (PDOL) used with the GET PROCESSING OPTIONS command
  * - the Card Risk Management Data Object Lists (CDOL1 and CDOL2) used with the GENERATE APPLICATION CRYPTOGRAM (AC) command
  * - the Transaction Certificate Data Object List (TDOL) used to generate a TC Hash Value
  * - the Dynamic Data Authentication Data Object List (DDOL) used with the INTERNAL AUTHENTICATE command
- *
+ * <p/>
  * ---------------------------------------------------------------------------
- *
+ * <p/>
  * In other words, a DOL is sent from the ICC. This DOL contains only Tag ID bytes and length bytes.
  * The Terminal constructs the response, which contains only the VALUES for these tags.
- *
+ * <p/>
  * //TODO check DOL processing on page 55
  *
  * @author sasc
  */
 public class DOL {
 
-    public enum Type{
+    public enum Type {
         PDOL("Processing Options Data Object List"),
         CDOL1("Card Risk Management Data Object List 1"),
         CDOL2("Card Risk Management Data Object List 2"),
@@ -65,16 +66,16 @@ public class DOL {
 
         private String description;
 
-        private Type(String description){
+        private Type(String description) {
             this.description = description;
         }
 
-        public String getDescription(){
+        public String getDescription() {
             return description;
         }
 
         @Override
-        public String toString(){
+        public String toString() {
             return getDescription();
         }
     }
@@ -82,30 +83,30 @@ public class DOL {
     private Type type;
     private List<TagAndLength> tagAndLengthList = new ArrayList<TagAndLength>();
 
-    public DOL(Type type, byte[] data){
+    public DOL(Type type, byte[] data) {
         //Parse tags and lengths
         this.type = type;
         this.tagAndLengthList = TLVUtil.parseTagAndLength(data);
     }
 
-    public List<TagAndLength> getTagAndLengthList(){
+    public List<TagAndLength> getTagAndLengthList() {
         return Collections.unmodifiableList(tagAndLengthList);
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         StringWriter sw = new StringWriter();
         dump(new PrintWriter(sw), 0);
         return sw.toString();
     }
 
-    public void dump(PrintWriter pw, int indent){
-        pw.println(Util.getSpaces(indent)+type.getDescription());
-        String indentStr = Util.getSpaces(indent+Log.INDENT_SIZE);
+    public void dump(PrintWriter pw, int indent) {
+        pw.println(Util.getSpaces(indent) + type.getDescription());
+        String indentStr = Util.getSpaces(indent + Log.INDENT_SIZE);
 
-        for(TagAndLength tagAndLength : tagAndLengthList){
+        for (TagAndLength tagAndLength : tagAndLengthList) {
             int length = tagAndLength.getLength();
-            pw.println(indentStr+tagAndLength.getTag().getName() + " ("+length+ " "+(length==1?"byte":"bytes")+")");
+            pw.println(indentStr + tagAndLength.getTag().getName() + " (" + length + " " + (length == 1 ? "byte" : "bytes") + ")");
         }
     }
 

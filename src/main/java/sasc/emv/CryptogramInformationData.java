@@ -18,23 +18,23 @@ package sasc.emv;
 /**
  * Cryptogram Information Data
  * Indicates the type of cryptogram and the actions to be performed by the terminal
- *
+ * <p/>
  * Length 1
  * Format binary
- *
+ * <p/>
  * TODO
  *
  * @author sasc
  */
 public class CryptogramInformationData {
     private byte cidByte;
-    
-    public CryptogramInformationData(byte cid){
+
+    public CryptogramInformationData(byte cid) {
         this.cidByte = cid;
     }
-    
-    public String getTEXT(){
-        switch(cidByte & 0xC0) {
+
+    public String getTEXT() {
+        switch (cidByte & 0xC0) {
             case 0x00:
                 return "AAC";
             case 0x40:
@@ -42,7 +42,7 @@ public class CryptogramInformationData {
             case 0x80:
                 return "ARQC";
             default: // 0xC0
-                return "RFU";                
+                return "RFU";
         }
     }
 }

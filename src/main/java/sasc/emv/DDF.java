@@ -15,19 +15,20 @@
  */
 package sasc.emv;
 
-import sasc.iso7816.ShortFileIdentifier;
 import sasc.iso7816.File;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import sasc.iso7816.ShortFileIdentifier;
 import sasc.util.Log;
 import sasc.util.Util;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 /**
  * Directory Definition File
  *
  * @author sasc
  */
-public class DDF implements File{ // implements DF {
+public class DDF implements File { // implements DF {
 
     private byte[] name;
     private ShortFileIdentifier sfi;
@@ -61,7 +62,7 @@ public class DDF implements File{ // implements DF {
         return languagePreference;
     }
 
-    public void setIssuerCodeTableIndex(int index){
+    public void setIssuerCodeTableIndex(int index) {
         issuerCodeTableIndex = index;
     }
 
@@ -69,8 +70,8 @@ public class DDF implements File{ // implements DF {
         return issuerCodeTableIndex;
     }
 
-    public String getIssuerCodeTable(){
-        return "ISO-8859-"+issuerCodeTableIndex;
+    public String getIssuerCodeTable() {
+        return "ISO-8859-" + issuerCodeTableIndex;
     }
 
     @Override
@@ -86,8 +87,8 @@ public class DDF implements File{ // implements DF {
         String indentStr = Util.getSpaces(indent + Log.INDENT_SIZE);
 
         pw.println(indentStr + "Name: " + Util.byteArrayToHexString(name) + " (=" + Util.getSafePrintChars(name) + ")");
-        if(issuerCodeTableIndex != -1){
-            pw.println(indentStr + "Issuer Code Table Index: " + issuerCodeTableIndex + " (ISO-8859-"+issuerCodeTableIndex+")");
+        if (issuerCodeTableIndex != -1) {
+            pw.println(indentStr + "Issuer Code Table Index: " + issuerCodeTableIndex + " (ISO-8859-" + issuerCodeTableIndex + ")");
         }
 
         if (sfi != null) {

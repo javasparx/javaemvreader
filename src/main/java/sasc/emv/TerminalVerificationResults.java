@@ -16,19 +16,19 @@
 package sasc.emv;
 
 import sasc.iso7816.SmartCardException;
+import sasc.util.Log;
+import sasc.util.Util;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.BitSet;
-import sasc.util.Log;
-import sasc.util.Util;
 
 /**
  * Terminal Verification Results (TVR)
  * Status of the different functions as seen from the terminal
- *
+ * <p/>
  * Data flow: Terminal -> ICC
  * (Terminal constructs TVR and transmits to card)
- * 
  *
  * @author sasc
  */
@@ -81,7 +81,7 @@ public class TerminalVerificationResults {
         description[38] = "SDA failed";
         description[39] = "Offline data authentication was not performed";
     }
-    
+
     private BitSet bitSet;
 
     public TerminalVerificationResults() {
@@ -126,6 +126,7 @@ public class TerminalVerificationResults {
     /**
      * There is no requirement in the EMV specification for an exception file,
      * but it is recognised that some terminals may have this capability.
+     *
      * @return
      */
     public boolean cardAppearsOnTerminalExceptionFile() {
@@ -315,7 +316,7 @@ public class TerminalVerificationResults {
     public boolean scriptProcessingFailedAfterFinal_GENERATE_AC() {
         return bitSet.get(getBitSetIndex(5, 5));
     }
-    
+
     public void reset() {
         bitSet.clear();
     }
@@ -335,7 +336,7 @@ public class TerminalVerificationResults {
     }
 
     //TODO checkActionCode(byte[] actionCode) ?????
-    
+
     @Override
     public String toString() {
         StringWriter sw = new StringWriter();
@@ -364,9 +365,9 @@ public class TerminalVerificationResults {
         tvr.setPinEntryRequired_PINPadPresent_ButPINWasNotEntered(false);
         tvr.setNewCard(true);
         System.out.println(tvr.toString());
-        
+
         System.out.println(Util.prettyPrintHexNoWrap(new TerminalVerificationResults().toByteArray()));
-        
+
         System.out.println(new TerminalVerificationResults(Util.fromHexString("8000048000"))); //Hobby store
         System.out.println(new TerminalVerificationResults(Util.fromHexString("0000008000"))); //Autogrill (IT)
 

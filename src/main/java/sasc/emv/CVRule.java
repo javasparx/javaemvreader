@@ -15,24 +15,25 @@
  */
 package sasc.emv;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import sasc.util.ISO4217_Numeric;
 import sasc.util.Log;
 import sasc.util.Util;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 /**
  * Describes Card holder Verification Method (CVM) Codes
  * EMV book 3 page 184
- * 
+ *
  * @author sasc
  */
 public class CVRule {
-    
+
     public static enum Rule {
-        FAIL_PROCESSING("Fail CVM processing"), 
+        FAIL_PROCESSING("Fail CVM processing"),
         NO_CVM_REQUIRED("No CVM required"),
-        PLAINTEXT_PIN_VERIFIED_BY_ICC("Plaintext PIN verification performed by ICC"), 
+        PLAINTEXT_PIN_VERIFIED_BY_ICC("Plaintext PIN verification performed by ICC"),
         PLAINTEXT_PIN_VERIFIED_BY_ICC_AND_SIGNATURE_ON_PAPER("Plaintext PIN verification performed by ICC and signature (paper)"),
         ENCIPHERED_PIN_VERIFIED_ONLINE("Enciphered PIN verified online"),
         ENCIPHERED_PIN_VERIFIED_BY_ICC("Enciphered PIN verification performed by ICC"),
@@ -42,20 +43,20 @@ public class CVRule {
         RESERVED_FOR_USE_BY_THE_ISSUER("Reserved for use by the issuer"),
         NOT_AVAILABLE_FOR_USE("Value is not available for use"),
         RFU("Reserved for future use");
-        
+
         private String description;
-        
-        private Rule(String description){
+
+        private Rule(String description) {
             this.description = description;
         }
-        
+
         public String getDescription() {
             return description;
         }
     }
-    
+
     public static enum Condition {
-        
+
     }
 
     byte firstByte;
@@ -73,31 +74,31 @@ public class CVRule {
         this.amountFieldXStr = CVRule.formatAmountField(amountFieldX);
         this.secondAmountFieldYBytes = secondAmountFieldY;
         this.secondAmountFieldYStr = CVRule.formatAmountField(secondAmountFieldYBytes);
-        
+
         Log.debug("first byte: " + Util.byte2Hex(firstByte));
-        
-        if(failCVMProcessing()){
+
+        if (failCVMProcessing()) {
             rule = Rule.FAIL_PROCESSING;
-        }else if(noCVMRequired()) {
+        } else if (noCVMRequired()) {
             rule = Rule.NO_CVM_REQUIRED;
-        }else if(plaintextPINVerificationPerformedByICC()) {
+        } else if (plaintextPINVerificationPerformedByICC()) {
             rule = Rule.PLAINTEXT_PIN_VERIFIED_BY_ICC;
-        }else if(plaintextPINVerificationPerformedByICCAndSignature_paper_()) {
+        } else if (plaintextPINVerificationPerformedByICCAndSignature_paper_()) {
             rule = Rule.PLAINTEXT_PIN_VERIFIED_BY_ICC_AND_SIGNATURE_ON_PAPER;
-        }else if(encipheredPINVerifiedOnline()) {
+        } else if (encipheredPINVerifiedOnline()) {
             rule = Rule.ENCIPHERED_PIN_VERIFIED_ONLINE;
-        }else if(encipheredPINVerificationPerformedByICC()) {
+        } else if (encipheredPINVerificationPerformedByICC()) {
             rule = Rule.ENCIPHERED_PIN_VERIFIED_BY_ICC;
-        }else if(encipheredPINVerificationPerformedByICCAndSignature_paper_()) {
+        } else if (encipheredPINVerificationPerformedByICCAndSignature_paper_()) {
             rule = Rule.ENCIPHERED_PIN_VERIFIED_BY_ICC_AND_SIGNATURE_ON_PAPER;
-        }else if(signature_paper_()) {
+        } else if (signature_paper_()) {
             rule = Rule.SIGNATURE_ON_PAPER;
-        }else if((firstByte & (byte) 0x30) == 0x20) {
-        	Log.debug("for payment sytem");
+        } else if ((firstByte & (byte) 0x30) == 0x20) {
+            Log.debug("for payment sytem");
             rule = Rule.RESERVED_FOR_USE_BY_THE_INDIVIDUAL_PAYMENT_SYSTEMS;
-        }else if((firstByte & (byte) 0x30) == 0x30) {
+        } else if ((firstByte & (byte) 0x30) == 0x30) {
             rule = Rule.RESERVED_FOR_USE_BY_THE_ISSUER;
-        }else /*if(firstByte >= 0x06 && firstByte <= 0x1D)*/ {
+        } else /*if(firstByte >= 0x06 && firstByte <= 0x1D)*/ {
             rule = Rule.RFU;
         }
     }
@@ -145,16 +146,16 @@ public class CVRule {
     public final boolean noCVMRequired() {
         return (firstByte & (byte) 0x3F) == (byte) 0x1F;
     }
-    
+
     public boolean isPinRelated() {
-        return plaintextPINVerificationPerformedByICC() 
+        return plaintextPINVerificationPerformedByICC()
                 || encipheredPINVerificationPerformedByICC()
                 || plaintextPINVerificationPerformedByICCAndSignature_paper_()
                 || encipheredPINVerificationPerformedByICCAndSignature_paper_()
                 || encipheredPINVerifiedOnline();
     }
-    
-    public Rule getRule(){
+
+    public Rule getRule() {
         return rule;
     }
 
@@ -166,25 +167,25 @@ public class CVRule {
         }
     }
 
-    public String getRuleString(){
+    public String getRuleString() {
         return rule.getDescription();
     }
 
-    private static String formatAmountField(byte[] amount){ //TODO Application Currency Code
+    private static String formatAmountField(byte[] amount) { //TODO Application Currency Code
         StringBuilder sb = new StringBuilder(String.valueOf(Util.byteArrayToInt(amount)));
-        while(sb.length() < 3){
+        while (sb.length() < 3) {
             sb.insert(0, '0');
         }
-        sb.insert(sb.length()-2, ".");
-        
+        sb.insert(sb.length() - 2, ".");
+
         int currencyCode = -1; //TODO get from app (if available)
-        if(currencyCode != -1){
+        if (currencyCode != -1) {
             String codeAlpha3 = ISO4217_Numeric.getCurrencyForCode(currencyCode).getCode();
-            if(codeAlpha3 != null && !codeAlpha3.isEmpty()) {
+            if (codeAlpha3 != null && !codeAlpha3.isEmpty()) {
                 sb.append(" ").append(codeAlpha3);
             }
         }
-        
+
         return sb.toString();
     }
 
@@ -239,19 +240,19 @@ public class CVRule {
 
         }
     }
-    
+
     public byte getConditionCode() {
         return secondByte;
     }
-    
+
     public byte getCodeCode() {
         return firstByte;
     }
-    
+
     public boolean getConditionAlways() {
         return secondByte == 0x00;
     }
-    
+
     public boolean getConditionTerminalSupportCVM() {
         return secondByte == 0x03;
     }
@@ -267,8 +268,8 @@ public class CVRule {
         pw.println(Util.getSpaces(indent) + "Cardholder Verification Rule");
         String indentStr = Util.getSpaces(indent + Log.INDENT_SIZE);
 
-        pw.println(indentStr + "Rule: "+getRuleString());
-        pw.println(indentStr + "Condition Code: "+getConditionCodeDescription());
+        pw.println(indentStr + "Rule: " + getRuleString());
+        pw.println(indentStr + "Condition Code: " + getConditionCodeDescription());
 
         pw.println(indentStr + getCVMUnsuccessfulRuleString());
 

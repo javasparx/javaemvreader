@@ -15,23 +15,23 @@
  */
 package sasc.emv;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.Arrays;
 import sasc.util.Log;
 import sasc.util.Util;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Arrays;
+
 /**
  * This implementation is a mix of EMV & VISA TTQ
- * 
+ * <p/>
  * VISA:
  * Terminal Transaction Qualifiers (Tag '9F66') is a reader data element
  * indicating capabilities (e.g., MSD or qVSDC) and transaction-specific
  * requirements (e.g., online) of the reader. It is requested by the card in the
  * PDOL and used by the card to determine how to process the transaction
  * (for example, process using MSD or qVSDC, process offline or online).
- * 
- * 
+ *
  * @author sasc
  */
 public class TerminalTransactionQualifiers {
@@ -147,8 +147,8 @@ public class TerminalTransactionQualifiers {
     }
 
     //The rest of the bits in the second byte are RFU (Reserved for Future Use)
-    
-    
+
+
     public String getContactlessMagneticStripeSupportedString() {
         if (contactlessMagneticStripeSupported()) {
             return "Contactless magnetic stripe (MSD) supported";

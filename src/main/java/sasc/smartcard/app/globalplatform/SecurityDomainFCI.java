@@ -15,10 +15,6 @@
  */
 package sasc.smartcard.app.globalplatform;
 
-import java.io.ByteArrayInputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.Arrays;
 import sasc.emv.EMVTags;
 import sasc.iso7816.AID;
 import sasc.iso7816.BERTLV;
@@ -27,8 +23,12 @@ import sasc.iso7816.TLVUtil;
 import sasc.util.Log;
 import sasc.util.Util;
 
+import java.io.ByteArrayInputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Arrays;
+
 /**
- *
  * Based on code by nelenkov
  */
 public class SecurityDomainFCI {
@@ -48,7 +48,7 @@ public class SecurityDomainFCI {
     private SecurityDomainFCI() {
     }
 
-//Example response to select:
+    //Example response to select:
 //
 //00 a4 04 00 05 a0 00 00 00 03 00
 //

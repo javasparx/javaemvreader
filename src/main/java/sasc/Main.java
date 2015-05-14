@@ -15,21 +15,14 @@
  */
 package sasc;
 
+import org.apache.commons.cli.*;
 import sasc.smartcard.common.CardExplorer;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.GnuParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 import sasc.terminal.Terminal;
 import sasc.terminal.TerminalAPIManager;
 import sasc.terminal.TerminalException;
 import sasc.terminal.TerminalProvider;
 
 /**
- *
  * @author sasc
  */
 public class Main {
@@ -97,28 +90,28 @@ public class Main {
         }
 
         if (listTerminals) {
-            try{
+            try {
                 TerminalProvider terminalProvider = TerminalAPIManager.getProvider(TerminalAPIManager.SelectionPolicy.ANY_PROVIDER);
-                for(Terminal terminal : terminalProvider.listTerminals()){
+                for (Terminal terminal : terminalProvider.listTerminals()) {
                     System.out.println(terminal.getTerminalInfo());
                 }
                 System.exit(0);
 
-            }catch(TerminalException ex){
+            } catch (TerminalException ex) {
                 ex.printStackTrace(System.err);
                 System.exit(-1);
             }
         }
 
         if (emulate) {
-            try{
+            try {
                 CardEmulatorMain.main(null);
                 System.exit(0);
-            }catch(TerminalException ex){
+            } catch (TerminalException ex) {
                 ex.printStackTrace(System.err);
                 System.exit(-1);
             }
-        } 
+        }
 
         if (noGUI) {
             //No Swing/GUI

@@ -18,15 +18,20 @@ package sasc.terminal;
 import java.util.List;
 
 /**
- *
  * @author sasc
  */
 public interface TerminalProvider {
     List<Terminal> listTerminals() throws TerminalException;
+
     CardConnection connectAnyTerminal() throws TerminalException;
+
     CardConnection connectAnyTerminal(String protocol) throws TerminalException;
+
     CardConnection connectAnyTerminalWithCardPresent(String protocol) throws TerminalException;
+
     CardConnection connectTerminal(String name) throws TerminalException;
+
     CardConnection connectTerminal(int index) throws TerminalException;
+
     String getProviderInfo();
 }

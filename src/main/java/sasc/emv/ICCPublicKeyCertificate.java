@@ -16,17 +16,17 @@
 package sasc.emv;
 
 import sasc.iso7816.SmartCardException;
+import sasc.util.Log;
+import sasc.util.Util;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import sasc.util.Log;
-import sasc.util.Util;
 
 /**
- *
  * @author sasc
  */
 public class ICCPublicKeyCertificate {
@@ -75,15 +75,15 @@ public class ICCPublicKeyCertificate {
         validationPerformed = true;
 
         if (issuerPublicKeyCert == null) {
-			issuerPublicKeyCert = application.getIssuerPublicKeyCertificate();
-		}
+            issuerPublicKeyCert = application.getIssuerPublicKeyCertificate();
+        }
 
-        if (issuerPublicKeyCert == null){
+        if (issuerPublicKeyCert == null) {
             //No isser public key cert found
             return isValid();
         }
 
-        if(!issuerPublicKeyCert.validate()){ //Init the cert
+        if (!issuerPublicKeyCert.validate()) { //Init the cert
             isValid = false;
             return isValid();
         }
@@ -120,7 +120,7 @@ public class ICCPublicKeyCertificate {
 
         int modBytesLength = bis.available() - 21;
 
-        if(iccPublicKeyModLengthTotal < modBytesLength) {
+        if (iccPublicKeyModLengthTotal < modBytesLength) {
             //The mod bytes block in the cert contains padding
             //we don't want padding in our key
             modBytesLength = iccPublicKeyModLengthTotal;
@@ -134,7 +134,7 @@ public class ICCPublicKeyCertificate {
 
         //Now read padding bytes (0xbb), if available
         //The padding bytes are not used
-        byte[] padding = new byte[bis.available()-21];
+        byte[] padding = new byte[bis.available() - 21];
         bis.read(padding, 0, padding.length);
 
         bis.read(hash, 0, hash.length);
@@ -146,23 +146,23 @@ public class ICCPublicKeyCertificate {
         hashStream.write(pan, 0, pan.length);
         hashStream.write(certExpirationDate, 0, certExpirationDate.length);
         hashStream.write(certSerialNumber, 0, certSerialNumber.length);
-        hashStream.write((byte)hashAlgorithmIndicator);
-        hashStream.write((byte)iccPublicKeyAlgorithmIndicator);
-        hashStream.write((byte)iccPublicKeyModLengthTotal);
-        hashStream.write((byte)iccPublicKeyExpLengthTotal);
+        hashStream.write((byte) hashAlgorithmIndicator);
+        hashStream.write((byte) iccPublicKeyAlgorithmIndicator);
+        hashStream.write((byte) iccPublicKeyModLengthTotal);
+        hashStream.write((byte) iccPublicKeyExpLengthTotal);
         byte[] ipkModulus = iccPublicKey.getModulus();
-        int numPadBytes = issuerPublicKey.getModulus().length-42-ipkModulus.length;
-        Log.debug("issuerMod: "+issuerPublicKey.getModulus().length + " iccMod: "+ipkModulus.length + " padBytes: "+numPadBytes);
-        if(numPadBytes > 0){
+        int numPadBytes = issuerPublicKey.getModulus().length - 42 - ipkModulus.length;
+        Log.debug("issuerMod: " + issuerPublicKey.getModulus().length + " iccMod: " + ipkModulus.length + " padBytes: " + numPadBytes);
+        if (numPadBytes > 0) {
             //If NIC <= NI – 42, consists of the full
             //ICC Public Key padded to the right
             //with NI – 42 – NIC bytes of value
             //'BB'
             hashStream.write(ipkModulus, 0, ipkModulus.length);
-            for(int i=0; i<numPadBytes; i++){
-                hashStream.write((byte)0xBB);
+            for (int i = 0; i < numPadBytes; i++) {
+                hashStream.write((byte) 0xBB);
             }
-        }else{
+        } else {
             //If NIC > NI – 42, consists of the NI –
             //42 most significant bytes of the
             //ICC Public Key
@@ -177,7 +177,7 @@ public class ICCPublicKeyCertificate {
         hashStream.write(offlineAuthenticationRecords, 0, offlineAuthenticationRecords.length);
         //Trailer not included in hash
 
-        Log.debug("HashStream:\n"+Util.prettyPrintHex(hashStream.toByteArray()));
+        Log.debug("HashStream:\n" + Util.prettyPrintHex(hashStream.toByteArray()));
 
         byte[] sha1Result = null;
         try {
@@ -219,7 +219,7 @@ public class ICCPublicKeyCertificate {
         pw.println(Util.getSpaces(indent) + "ICC Public Key Certificate");
         String indentStr = Util.getSpaces(indent + Log.INDENT_SIZE);
 
-        if(!validationPerformed){
+        if (!validationPerformed) {
             validate();
         }
 
@@ -229,21 +229,21 @@ public class ICCPublicKeyCertificate {
             pw.println(indentStr + "Certificate Format: " + certFormat);
             pw.println(indentStr + "Certificate Expiration Date (MMYY): " + Util.byteArrayToHexString(certExpirationDate));
             pw.println(indentStr + "Certificate Serial Number: " + Util.byteArrayToHexString(certSerialNumber));
-            pw.println(indentStr + "Hash Algorithm Indicator: " + hashAlgorithmIndicator +" (=SHA-1)");
-            pw.println(indentStr + "ICC Public Key Algorithm Indicator: " + iccPublicKeyAlgorithmIndicator +" (=RSA)");
+            pw.println(indentStr + "Hash Algorithm Indicator: " + hashAlgorithmIndicator + " (=SHA-1)");
+            pw.println(indentStr + "ICC Public Key Algorithm Indicator: " + iccPublicKeyAlgorithmIndicator + " (=RSA)");
             pw.println(indentStr + "Hash: " + Util.byteArrayToHexString(hash));
 
             iccPublicKey.dump(pw, indent + Log.INDENT_SIZE);
         } else {
             if (this.issuerPublicKeyCert == null) {
                 pw.println(indentStr + "NO ISSUER CERTIFICATE FOUND. UNABLE TO VALIDATE CERTIFICATE");
-			} else {
-				pw.println(indentStr + "CERTIFICATE NOT VALID");
-			}
+            } else {
+                pw.println(indentStr + "CERTIFICATE NOT VALID");
+            }
         }
     }
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
 
         EMVApplication app = new EMVApplication();
 
@@ -252,21 +252,19 @@ public class ICCPublicKeyCertificate {
         System.out.println(app.getApplicationFileLocator());
 
         byte[] appRecord = Util.fromHexString("70 56 5f 25 03 12 08 01 5f 24 03 15 08 31 5a 08"
-                +"46 92 98 20 36 76 95 49 5f 34 01 01 9f 07 02 ff"
-                +"80 8e 14 00 00 00 00 00 00 00 00 02 01 44 03 01"
-                +"03 02 03 1e 03 1f 00 9f 0d 05 b8 60 ac 88 00 9f"
-                +"0e 05 00 10 00 00 00 9f 0f 05 b8 68 bc 98 00 5f"
-                +"28 02 06 42 9f 4a 01 82");
+                + "46 92 98 20 36 76 95 49 5f 34 01 01 9f 07 02 ff"
+                + "80 8e 14 00 00 00 00 00 00 00 00 02 01 44 03 01"
+                + "03 02 03 1e 03 1f 00 9f 0d 05 b8 60 ac 88 00 9f"
+                + "0e 05 00 10 00 00 00 9f 0f 05 b8 68 bc 98 00 5f"
+                + "28 02 06 42 9f 4a 01 82");
 
         EMVUtil.printResponse(appRecord, true);
 
-          Record record = new Record(appRecord, 1, true);
-         app.getApplicationFileLocator().getApplicationElementaryFiles().get(2).setRecord(1, record);
+        Record record = new Record(appRecord, 1, true);
+        app.getApplicationFileLocator().getApplicationElementaryFiles().get(2).setRecord(1, record);
 
-        StaticDataAuthenticationTagList staticDataAuthTagList = new StaticDataAuthenticationTagList(new byte[]{(byte)0x82});
+        StaticDataAuthenticationTagList staticDataAuthTagList = new StaticDataAuthenticationTagList(new byte[]{(byte) 0x82});
         app.setStaticDataAuthenticationTagList(staticDataAuthTagList);
-
-
 
 
         IssuerPublicKeyCertificate issuerPKCert = new IssuerPublicKeyCertificate(CA.getCA(Util.fromHexString("A0 00 00 00 03")));

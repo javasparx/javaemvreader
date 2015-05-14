@@ -15,13 +15,13 @@
  */
 package sasc.emv;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import sasc.util.Log;
 import sasc.util.Util;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 /**
- *
  * @author sasc
  */
 public class ServiceCode {
@@ -39,8 +39,8 @@ public class ServiceCode {
         }
         this.serviceCode = serviceCode;
     }
-    
-    public ServiceCode(int serviceCode){
+
+    public ServiceCode(int serviceCode) {
         this(String.valueOf(serviceCode).toCharArray());
     }
 

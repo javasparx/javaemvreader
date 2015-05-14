@@ -15,13 +15,13 @@
  */
 package sasc.iso7816;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import sasc.emv.EMVTags;
 import sasc.util.Util;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+
 /**
- *
  * @author sasc
  */
 public class BERTLV {
@@ -32,10 +32,9 @@ public class BERTLV {
     private int length;
 
     /**
-     *
      * @param tag
-     * @param length contains the number of value bytes (parsed from the rawEncodedLengthBytes)
-     * @param rawLengthBytes the raw encoded length bytes
+     * @param length         contains the number of value bytes (parsed from the rawEncodedLengthBytes)
+     * @param rawEncodedLengthBytes the raw encoded length bytes
      * @param valueBytes
      */
     public BERTLV(Tag tag, int length, byte[] rawEncodedLengthBytes, byte[] valueBytes) {
@@ -55,8 +54,8 @@ public class BERTLV {
         this.valueBytes = valueBytes;
         this.length = valueBytes.length;
     }
-    
-    public static byte[] encodeLength(int length){
+
+    public static byte[] encodeLength(int length) {
         //TODO
         throw new UnsupportedOperationException("Not implemented yet");
     }
@@ -79,7 +78,7 @@ public class BERTLV {
 
     public byte[] toBERTLVByteArray() {
         byte[] tagBytes = tag.getTagBytes();
-        ByteArrayOutputStream stream = new ByteArrayOutputStream(tagBytes.length+rawEncodedLengthBytes.length+valueBytes.length);
+        ByteArrayOutputStream stream = new ByteArrayOutputStream(tagBytes.length + rawEncodedLengthBytes.length + valueBytes.length);
         stream.write(tagBytes, 0, tagBytes.length);
         stream.write(rawEncodedLengthBytes, 0, rawEncodedLengthBytes.length);
         stream.write(valueBytes, 0, valueBytes.length);
@@ -98,7 +97,7 @@ public class BERTLV {
     public int getLength() {
         return length;
     }
-    
+
     public static void main(String[] args) throws Exception {
 //> 6f 23 -- File Control Information (FCI) Template
 //>       84 0e -- Dedicated File (DF) Name
@@ -110,9 +109,9 @@ public class BERTLV {
 //>                                  a0 00 00 00 04 10 10 (BINARY)
 //>                            87 01 -- Application Priority Indicator
 //>                                  01 (BINARY)
-        
+
 //        BERTLV fciTemplate = new BERTLV(EMVTags.FCI_TEMPLATE, )
-                
+
         //TODO create PPSE.toBytes(byte[] outBuf, short len)
 
     }

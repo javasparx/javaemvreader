@@ -15,11 +15,7 @@
  */
 package sasc.smartcard.app.globalplatform;
 
-import java.io.ByteArrayInputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import sasc.emv.EMVTags;
-import sasc.emv.EMVUtil;
 import sasc.iso7816.BERTLV;
 import sasc.iso7816.SmartCardException;
 import sasc.iso7816.TLVUtil;
@@ -27,32 +23,35 @@ import sasc.util.Log;
 import sasc.util.OIDUtil;
 import sasc.util.Util;
 
+import java.io.ByteArrayInputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 /**
- *
  * @author sasc
  */
 public class CardRecognitionData {
-    
+
     String tagAllocationAuthorityOID = null;
     String cardManagementTypeAndVersion = null;
     String cardIdentificationScheme = null;
     String scpVersionAndOptions = null;
     String cardConfigurationDetails = null;
     String cardChipDetails = null;
-    
+
     private CardRecognitionData() {
-        
+
     }
-    
+
     public static CardRecognitionData parse(byte[] data) {
         CardRecognitionData cardRecognitionData = new CardRecognitionData();
-        
+
         ByteArrayInputStream bis = new ByteArrayInputStream(data);
 
         if (bis.available() < 2) {
             throw new SmartCardException("Error parsing Card Recognition Data: Length < 2. Data: " + Util.prettyPrintHexNoWrap(data));
         }
-        
+
         BERTLV tlv = TLVUtil.getNextTLV(bis);
 
         if (!tlv.getTag().equals(GPTags.SECURITY_DOMAIN_MANAGEMENT_DATA)) {
@@ -66,19 +65,19 @@ public class CardRecognitionData {
             if (tlv.getTag().equals(EMVTags.UNIVERSAL_TAG_FOR_OID)) {
                 cardRecognitionData.tagAllocationAuthorityOID = OIDUtil.decodeOID(tlv.getValueBytes());
                 Log.debug(cardRecognitionData.tagAllocationAuthorityOID);
-            }else if(tlv.getTag().equals(GPTags.CARD_MANAGEMENT_TYPE_AND_VERSION_OID)) {
+            } else if (tlv.getTag().equals(GPTags.CARD_MANAGEMENT_TYPE_AND_VERSION_OID)) {
                 tlv = TLVUtil.getNextTLV(new ByteArrayInputStream(tlv.getValueBytes()));
                 cardRecognitionData.cardManagementTypeAndVersion = OIDUtil.decodeOID(tlv.getValueBytes());
                 Log.debug(cardRecognitionData.cardManagementTypeAndVersion);
-            }else if(tlv.getTag().equals(GPTags.CARD_IDENTIFICATION_SCHEME_OID)) {
+            } else if (tlv.getTag().equals(GPTags.CARD_IDENTIFICATION_SCHEME_OID)) {
                 tlv = TLVUtil.getNextTLV(new ByteArrayInputStream(tlv.getValueBytes()));
                 cardRecognitionData.cardIdentificationScheme = OIDUtil.decodeOID(tlv.getValueBytes());
                 Log.debug(cardRecognitionData.cardIdentificationScheme);
-            }else if(tlv.getTag().equals(GPTags.SECURE_CHANNEL_OID)) {
+            } else if (tlv.getTag().equals(GPTags.SECURE_CHANNEL_OID)) {
                 tlv = TLVUtil.getNextTLV(new ByteArrayInputStream(tlv.getValueBytes()));
                 cardRecognitionData.scpVersionAndOptions = OIDUtil.decodeOID(tlv.getValueBytes());
                 Log.debug(cardRecognitionData.scpVersionAndOptions);
-            }else if(tlv.getTag().equals(GPTags.CARD_CONFIGURATION_DETAILS)) {
+            } else if (tlv.getTag().equals(GPTags.CARD_CONFIGURATION_DETAILS)) {
                 BERTLV tlvCcd = TLVUtil.getNextTLV(new ByteArrayInputStream(tlv.getValueBytes()));
                 if (tlvCcd.getTag().equals(EMVTags.UNIVERSAL_TAG_FOR_OID)) {
                     cardRecognitionData.cardConfigurationDetails = OIDUtil.decodeOID(tlvCcd.getValueBytes());
@@ -87,7 +86,7 @@ public class CardRecognitionData {
                     cardRecognitionData.cardConfigurationDetails = Util.prettyPrintHexNoWrap(tlv.getValueBytes());
                 }
                 Log.debug(cardRecognitionData.cardConfigurationDetails);
-            }else if(tlv.getTag().equals(GPTags.CARD_CHIP_DETAILS)) {
+            } else if (tlv.getTag().equals(GPTags.CARD_CHIP_DETAILS)) {
                 BERTLV tlvCcd = TLVUtil.getNextTLV(new ByteArrayInputStream(tlv.getValueBytes()));
                 if (tlvCcd.getTag().equals(EMVTags.UNIVERSAL_TAG_FOR_OID)) {
                     cardRecognitionData.cardChipDetails = OIDUtil.decodeOID(tlvCcd.getValueBytes());
@@ -101,36 +100,36 @@ public class CardRecognitionData {
 
         return cardRecognitionData;
     }
-    
+
     @Override
     public String toString() {
         StringWriter sw = new StringWriter();
         dump(new PrintWriter(sw), 0);
         return sw.toString();
     }
-    
+
     public void dump(PrintWriter pw, int indent) {
         pw.println(Util.getSpaces(indent) + "Card Recognition Data");
 
         String indentStr = Util.getSpaces(indent + Log.INDENT_SIZE);
-        
-        if(tagAllocationAuthorityOID != null) {
-            pw.println(indentStr+"Tag Allocation Authority (OID)        : " + tagAllocationAuthorityOID);
+
+        if (tagAllocationAuthorityOID != null) {
+            pw.println(indentStr + "Tag Allocation Authority (OID)        : " + tagAllocationAuthorityOID);
         }
-        if(cardManagementTypeAndVersion != null) {
-            pw.println(indentStr+"Card Management Type and Version (OID): " + cardManagementTypeAndVersion);
+        if (cardManagementTypeAndVersion != null) {
+            pw.println(indentStr + "Card Management Type and Version (OID): " + cardManagementTypeAndVersion);
         }
-        if(cardIdentificationScheme != null) {
-            pw.println(indentStr+"Card Identification Scheme (OID)      : " + cardIdentificationScheme);
+        if (cardIdentificationScheme != null) {
+            pw.println(indentStr + "Card Identification Scheme (OID)      : " + cardIdentificationScheme);
         }
-        if(scpVersionAndOptions != null) {
-            pw.println(indentStr+"SCP Version and Options               : " + scpVersionAndOptions);
+        if (scpVersionAndOptions != null) {
+            pw.println(indentStr + "SCP Version and Options               : " + scpVersionAndOptions);
         }
-        if(cardConfigurationDetails != null) {
-            pw.println(indentStr+"Card Config Details                   : " + cardConfigurationDetails);
+        if (cardConfigurationDetails != null) {
+            pw.println(indentStr + "Card Config Details                   : " + cardConfigurationDetails);
         }
-        if(cardChipDetails != null) {
-            pw.println(indentStr+"Card/Chip Details                     : " + cardChipDetails);
+        if (cardChipDetails != null) {
+            pw.println(indentStr + "Card/Chip Details                     : " + cardChipDetails);
         }
 
     }

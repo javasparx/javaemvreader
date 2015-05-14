@@ -82,7 +82,7 @@ public class RSAKeyGenerator {
 
         //NOTE: using a low public exponent in RSA, like 3, leaves the system vulnerable to certain types of attack.
         //However, in EMV, these attacks do not apply. (TODO: Verify!)
-        
+
         // Generate a 1152-bit RSA key pair with exponent == 3
         dump(generateRSAKeys(1152, 3));
     }
